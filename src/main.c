@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "utlist.h"
-
+#include "happy.h"
 struct node_t {
     char *name;
     struct node_t *next;
@@ -19,8 +19,8 @@ int main() {
     };
 
 
-
-
     printf("Hello, World!\n");
+    happy();
     return 0;
 }
+
