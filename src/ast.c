@@ -11,8 +11,8 @@
 
 void ast_node_destroy(ASTNode *node) {
     assert(node != NULL);
-    assert(node->prev == NULL && "can not destroy a node white it still attached");
-    assert(node->next == NULL && "can not destroy a node white it still attached");
+    assert(node->prev == NULL && "can not destroy a node while it still attached");
+    assert(node->next == NULL && "can not destroy a node while it still attached");
     ASTNodeAttr *attr = NULL, *tmp = NULL;
     LL_FOREACH_SAFE(node->first_attr, attr, tmp) {
         LL_DELETE(node->first_attr, attr);
@@ -35,7 +35,7 @@ ASTNodeAttr *ast_node_attr_create_node(char *key, ASTNode *node) {
 
 void ast_node_attr_destroy(ASTNodeAttr *attr) {
     assert(attr != NULL && "attr should not be null");
-    assert(attr->next == NULL && "can not destroy an attr white it still attached");
+    assert(attr->next == NULL && "can not destroy an attr while it still attached");
     switch (attr->kind) {
         case AST_NODE: {
             ASTNode *node = NULL, *tmp = NULL, *head = attr->value;
