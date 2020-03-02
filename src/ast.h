@@ -5,6 +5,7 @@
 #ifndef PASCAL2C_AST_H
 #define PASCAL2C_AST_H
 
+
 #include "sds.h"
 #include <stdio.h>
 #include "string.h"
@@ -17,7 +18,7 @@ enum ast_node_attr_kind {
 };
 
 struct ast_node_attr_t {
-    char *key;
+    const char *key;
     enum ast_node_attr_kind kind;
     void *value;
     struct ast_node_attr_t *next;
@@ -29,7 +30,7 @@ struct ast_node_pos_t {
 };
 
 struct ast_node_t {
-    char *type;
+    const char *type;
     struct ast_node_pos_t *pos;
     struct ast_node_attr_t *first_attr;
     struct ast_node_t *next;
@@ -57,7 +58,7 @@ ASTNodePos *ast_node_pos_create(int start, int end, int col, int row);
  * @param pos ASTNodePos Object
  * @return ASTNode Object
  */
-ASTNode *ast_node_create(char *type, ASTNodePos *pos);
+ASTNode *ast_node_create(const char *type, ASTNodePos *pos);
 
 /**
  * Destroy an AST Object and free the heap memory allocated for it ( including sub-objs, attr objs ... )
@@ -71,7 +72,7 @@ void ast_node_destroy(ASTNode *node);
  * @param val the attribute value
  * @return ASTNodeAttr Object
  */
-ASTNodeAttr *ast_node_attr_create_integer(char *key, int val);
+ASTNodeAttr *ast_node_attr_create_integer(const char *key, int val);
 
 /**
  * Create a string attribute object from the const str
@@ -79,7 +80,7 @@ ASTNodeAttr *ast_node_attr_create_integer(char *key, int val);
  * @param val the attribute value
  * @return ASTNodeAttr Object
  */
-ASTNodeAttr *ast_node_attr_create_const_str(char *key, char *val);
+ASTNodeAttr *ast_node_attr_create_const_str(const const char *key, char *val);
 
 /**
  * Create a string attribute object
@@ -87,7 +88,7 @@ ASTNodeAttr *ast_node_attr_create_const_str(char *key, char *val);
  * @param val the attribute value
  * @return ASTNodeAttr Object
  */
-ASTNodeAttr *ast_node_attr_create_str(char *key, sds str);
+ASTNodeAttr *ast_node_attr_create_str(const char *key, sds str);
 
 /**
  * Create an ASTNodes attribute object ( the attr contains ast node(s) )
@@ -95,7 +96,7 @@ ASTNodeAttr *ast_node_attr_create_str(char *key, sds str);
  * @param val the attribute value
  * @return ASTNodeAttr Object
  */
-ASTNodeAttr *ast_node_attr_create_node(char *key, ASTNode *node);
+ASTNodeAttr *ast_node_attr_create_node(const char *key, ASTNode *node);
 
 /**
  * Destroy an ASTNodes attribute object and free the heap memory allocated for it ( including sub-objs, string allocated on heap )
@@ -118,7 +119,7 @@ void ast_node_attach_attr(ASTNode *node, ASTNodeAttr *attr);
  * @param key
  * @return ASTNodeAttr Object, null if it doesn't exist.
  */
-ASTNodeAttr *ast_node_get_attr(ASTNode *node, char *key);
+ASTNodeAttr *ast_node_get_attr(ASTNode *node, const char *key);
 
 /**
  * Get an integer attribute value from the AST node, panic if it doesn't exist.
@@ -126,7 +127,7 @@ ASTNodeAttr *ast_node_get_attr(ASTNode *node, char *key);
  * @param key
  * @return
  */
-int ast_node_get_attr_integer_value(ASTNode *node, char *key);
+int ast_node_get_attr_integer_value(ASTNode *node, const char *key);
 
 /**
  * Get an string attribute value from the AST node, panic if it doesn't exist.
@@ -134,7 +135,7 @@ int ast_node_get_attr_integer_value(ASTNode *node, char *key);
  * @param key
  * @return
  */
-char *ast_node_get_attr_str_value(ASTNode *node, char *key);
+char *ast_node_get_attr_str_value(ASTNode *node, const char *key);
 
 /**
  * Get an ASTNodes attribute value from the AST node, panic if it doesn't exist.
@@ -142,6 +143,54 @@ char *ast_node_get_attr_str_value(ASTNode *node, char *key);
  * @param key
  * @return
  */
-ASTNode *ast_node_get_attr_node_value(ASTNode *node, char *key);
+ASTNode *ast_node_get_attr_node_value(ASTNode *node, const char *key);
+
+/**
+ * Set the the value of the attribute called `key`  to `value` regardless of whether exists.
+ * But this operation can't override its kind.
+ * @param node
+ * @param key
+ * @param value
+ */
+void ast_node_set_attr_integer(ASTNode *node, const char *key, int value);
+
+/**
+ * Set the the value of the attribute called `key`  to `value` regardless of whether exists.
+ * But this operation can't override its kind.
+ * @param node
+ * @param key
+ * @param value
+ */
+void ast_node_set_attr_str(ASTNode *node, const char *key, sds value);
+
+/**
+ * Set the the value of the attribute called `key`  to `value` regardless of whether exists.
+ * But this operation can't override its kind.
+ * @param node
+ * @param key
+ * @param value
+ */
+void ast_node_set_attr_const_str(ASTNode *node, const char *key, const char *value);
+
+/**
+ * Set the the value of the attribute called `key`  to `value` regardless of whether exists.
+ * But this operation can't override its kind.
+ * @param node
+ * @param key
+ * @param sub_node
+ */
+void ast_node_attr_node_append(ASTNode *node, const char *key, ASTNode *sub_node);
+
+void _ast_node_attr_dump_fp(ASTNodeAttr *head, FILE *fp);
+
+void _ast_node_dump_fp(ASTNode *head, FILE *fp);
+
+
+/**
+ * Dump the ast tree to a json file.
+ * @param head
+ * @param filename
+ */
+void ast_node_dump_json(ASTNode *head, char *filename);
 
 #endif //PASCAL2C_AST_H
