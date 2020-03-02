@@ -73,6 +73,13 @@
                                             }
                                         }
                                     }
+    "//"                            {
+                                        int c;
+                                        while((c = input())){
+                                            if(c == '\n') break;
+                                        }
+                                        LINE_NUM++;
+                                    }
     .						        {printf("Invalid char %s at line: %d\n", yytext, LINE_NUM);exit(1); }
 
 %%
