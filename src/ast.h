@@ -6,6 +6,8 @@
 #define PASCAL2C_AST_H
 
 #include "sds.h"
+#include <stdio.h>
+#include "string.h"
 
 enum ast_node_attr_kind {
     CONST_STRING = 1,
@@ -13,6 +15,7 @@ enum ast_node_attr_kind {
     INTEGER = 3,
     AST_NODE = 4
 };
+
 struct ast_node_attr_t {
     char *key;
     enum ast_node_attr_kind kind;
@@ -24,6 +27,7 @@ struct ast_node_pos_t {
     int start, end;
     int col, row;
 };
+
 struct ast_node_t {
     char *type;
     struct ast_node_pos_t *pos;
@@ -31,6 +35,7 @@ struct ast_node_t {
     struct ast_node_t *next;
     struct ast_node_t *prev;
 };
+
 
 typedef struct ast_node_attr_t ASTNodeAttr;
 typedef struct ast_node_t ASTNode;
@@ -46,7 +51,6 @@ typedef struct ast_node_pos_t ASTNodePos;
  */
 ASTNodePos *ast_node_pos_create(int start, int end, int col, int row);
 
-
 /**
  * Create an Abstract syntax tree (AST) Object
  * @param type const string (char* without malloc)
@@ -60,7 +64,6 @@ ASTNode *ast_node_create(char *type, ASTNodePos *pos);
  * @param node
  */
 void ast_node_destroy(ASTNode *node);
-
 
 /**
  * Create an integer attribute object
@@ -101,7 +104,6 @@ ASTNodeAttr *ast_node_attr_create_node(char *key, ASTNode *node);
  * @return ASTNodeAttr Object
  */
 void ast_node_attr_destroy(ASTNodeAttr *attr);
-
 
 /**
  * Attach an attribute object to the AST node ( panic if name ( key ) duplicates )
