@@ -11,10 +11,10 @@
 #include "string.h"
 
 enum ast_node_attr_kind {
-    CONST_STRING = 1,
-    STRING = 2,
-    INTEGER = 3,
-    AST_NODE = 4
+    ATTR_KIND_CONST_STRING = 1,
+    ATTR_KIND_STRING = 2,
+    ATTR_KIND_INTEGER = 3,
+    ATTR_KIND_AST_NODE = 4
 };
 
 struct ast_node_attr_t {

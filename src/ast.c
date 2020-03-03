@@ -37,7 +37,7 @@ ASTNodeAttr *ast_node_attr_create_node(const char *key, ASTNode *node) {
     assert(node != NULL && "ast node in attr should not be null");
     ASTNodeAttr *attr = malloc(sizeof(ASTNodeAttr));
     attr->key = key;
-    attr->kind = AST_NODE;
+    attr->kind = ATTR_KIND_AST_NODE;
     attr->value = (void *) node;
     attr->next = NULL;
     return attr;
@@ -47,7 +47,7 @@ void ast_node_attr_destroy(ASTNodeAttr *attr) {
     assert(attr != NULL && "attr should not be null");
     assert(attr->next == NULL && "can not destroy an attr while it still attached");
     switch (attr->kind) {
-        case AST_NODE: {
+        case ATTR_KIND_AST_NODE: {
             ASTNode *node = NULL, *tmp = NULL, *head = attr->value;
             DL_FOREACH_SAFE(head, node, tmp) {
                 DL_DELETE(head, node);
@@ -55,7 +55,7 @@ void ast_node_attr_destroy(ASTNodeAttr *attr) {
             }
             break;
         }
-        case STRING:
+        case ATTR_KIND_STRING:
             sdsfree((sds) attr);
             break;
     }
@@ -68,7 +68,7 @@ ASTNodeAttr *ast_node_attr_create_integer(const char *key, int val) {
     static int value;
     value = val;
     attr->key = key;
-    attr->kind = INTEGER;
+    attr->kind = ATTR_KIND_INTEGER;
     attr->value = (int *) &value;
     attr->next = NULL;
     return attr;
@@ -78,7 +78,7 @@ ASTNodeAttr *ast_node_attr_create_const_str(const char *key, char *val) {
     assert(key != NULL && "attr key should not be null");
     ASTNodeAttr *attr = malloc(sizeof(ASTNodeAttr));
     attr->key = key;
-    attr->kind = CONST_STRING;
+    attr->kind = ATTR_KIND_CONST_STRING;
     attr->value = val;
     attr->next = NULL;
     return attr;
@@ -88,7 +88,7 @@ ASTNodeAttr *ast_node_attr_create_str(const char *key, sds str) {
     assert(key != NULL && "attr key should not be null");
     ASTNodeAttr *attr = malloc(sizeof(ASTNodeAttr));
     attr->key = key;
-    attr->kind = STRING;
+    attr->kind = ATTR_KIND_STRING;
     attr->value = str;
     attr->next = NULL;
     return attr;
@@ -112,7 +112,7 @@ void ast_node_set_attr_integer(ASTNode *node, const char *key, int value) {
         attr = ast_node_attr_create_integer(key, value);
         ast_node_attach_attr(node, attr);
     } else {
-        assert(attr->kind == INTEGER);
+        assert(attr->kind == ATTR_KIND_INTEGER);
         attr->value = (void *) value;
     }
 }
@@ -123,7 +123,7 @@ void ast_node_set_attr_str(ASTNode *node, const char *key, sds value) {
         attr = ast_node_attr_create_str(key, value);
         ast_node_attach_attr(node, attr);
     } else {
-        assert(attr->kind == STRING);
+        assert(attr->kind == ATTR_KIND_STRING);
         sds_free(attr->value);
         attr->value = (void *) value;
     }
@@ -135,7 +135,7 @@ void ast_node_set_attr_const_str(ASTNode *node, const char *key, const char *val
         attr = ast_node_attr_create_const_str(key, value);
         ast_node_attach_attr(node, attr);
     } else {
-        assert(attr->kind == CONST_STRING);
+        assert(attr->kind == ATTR_KIND_CONST_STRING);
         attr->value = (void *) value;
     }
 }
@@ -148,7 +148,7 @@ void ast_node_attr_node_append(ASTNode *node, const char *key, ASTNode *sub_node
         attr = ast_node_attr_create_node(key, sub_node);
         ast_node_attach_attr(node, attr);
     } else {
-        assert(attr->kind == AST_NODE);
+        assert(attr->kind == ATTR_KIND_AST_NODE);
         ASTNode *head = (ASTNode *) attr->value;
         LL_APPEND(head, sub_node);
     }
@@ -215,7 +215,7 @@ int ast_node_get_attr_integer_value(ASTNode *node, const char *key) {
 //    }
     ASTNodeAttr *target_attr = ast_node_get_attr(node, key);
     assert(target_attr != NULL && "ast node doesn't have attr named key");
-    assert(target_attr->kind == INTEGER && "attr node named key isn't integer node");
+    assert(target_attr->kind == ATTR_KIND_INTEGER && "attr node named key isn't integer node");
 
     return *(int *) target_attr->value;
 }
@@ -236,7 +236,7 @@ char *ast_node_get_attr_str_value(ASTNode *node, const char *key) {
 //    }
     ASTNodeAttr *target_attr = ast_node_get_attr(node, key);
     assert(target_attr != NULL && "ast node doesn't have attr named key");
-    assert(target_attr->kind == STRING && "attr node named key isn't string node");
+    assert(target_attr->kind == ATTR_KIND_STRING && "attr node named key isn't string node");
 
     return (char *) target_attr->value;
 }
@@ -257,7 +257,7 @@ ASTNode *ast_node_get_attr_node_value(ASTNode *node, const char *key) {
 //    }
     ASTNodeAttr *target_attr = ast_node_get_attr(node, key);
     assert(target_attr != NULL && "ast node doesn't have attr named key");
-    assert(target_attr->kind == AST_NODE && "attr node named key isn't ast node");
+    assert(target_attr->kind == ATTR_KIND_AST_NODE && "attr node named key isn't ast node");
 
     return (ASTNode *) target_attr->value;
 }
@@ -274,15 +274,15 @@ void _ast_node_attr_dump_fp(ASTNodeAttr *head, FILE *fp) {
         if (attr != head) fprintf(fp, ",");
         fprintf(fp, "\"%s\":", attr->key);
         switch (attr->kind) {
-            case INTEGER:
+            case ATTR_KIND_INTEGER:
                 fprintf(fp, "%d", (int) attr->value);
                 break;
-            case CONST_STRING:
-            case STRING:
+            case ATTR_KIND_CONST_STRING:
+            case ATTR_KIND_STRING:
                 fprintf(fp, "\"%s\"", (char *) attr->value);
                 break;
 
-            case AST_NODE:
+            case ATTR_KIND_AST_NODE:
                 assert(attr->value != NULL);
                 _ast_node_dump_fp((ASTNode *) (attr->value), fp);
                 break;
