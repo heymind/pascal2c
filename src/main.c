@@ -11,17 +11,23 @@ ASTNode*  _ast_node_create(const char *type){
 }
 
 int main(int argc, char* argv[]) {
-        yyin = stdin;
-        root = ast_node_create_without_pos("PROGRAM");
-        if (argc>1) {
-            if ((yyin = fopen(argv[1], "r")) == NULL) {
-                printf("Can't open file %s\n", argv[1]);
-                return -1;
-            }
+    yyin = stdin;
+    root = ast_node_create_without_pos("PROGRAM");
+    if (argc > 1) {
+        if ((yyin = fopen(argv[1], "r")) == NULL) {
+            printf("Can't open file %s\n", argv[1]);
+            return -1;
         }
-        yyparse();
-        printf("%s", root->first_attr->value);
-        ast_node_dump_json(root,"step0.json");
+    } else {
+        if ((yyin = fopen("../sample_pas/gcd.pas", "r")) == NULL) {
+            printf("Can't open file %s\n", argv[1]);
+            return -1;
+        }
+
+    }
+    yyparse();
+//    printf("%s", root->first_attr->value);
+    ast_node_dump_json(root, "step0.json");
 //        ASTNode *program_node = _ast_node_create("PROGRAM");
 //        ast_node_set_attr_str(program_node, "NAME", sdsnew("loop2"));
 //

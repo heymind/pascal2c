@@ -155,6 +155,8 @@ void ast_node_set_attr_const_str(ASTNode *node, const char *key, const char *val
 }
 
 void ast_node_attr_node_append(ASTNode *node, const char *key, ASTNode *sub_node) {
+    if (sub_node == NULL)
+        return;
     assert(sub_node->next == NULL && sub_node->prev == NULL && "sub_node should not be attached");
 
     ASTNodeAttr *attr = ast_node_get_attr(node, key);
