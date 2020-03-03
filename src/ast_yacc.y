@@ -22,23 +22,23 @@ program_struct:     program_head ';' program_body '.'
 program_head :      PROGRAM IDENTIFIER {ast_node_set_attr_str(program_node, "NAME", sdsnew(str));} ( idlist ) |
                     PROGRAM IDENTIFIER {ast_node_set_attr_str(program_node, "NAME", sdsnew(str));}
                     ;
-idlist:             islist ',' IDENTIFIER | IDENTIFIER
+idlist:             islist ',' IDENTIFIER | IDENTIFIER ;
 program_body:       const_declarations |
                     var_declarations   |
                     subprogram_declarations |
-                    compound_statement
-const_declarations: CONST const_declaration ';' |
+                    compound_statement;
+const_declarations: | CONST const_declaration ';' ;
 const_declaration:  const_declaration ';' IDENTIFIER '=' const_value |
-                    IDENTIFIER '=' const_value
-const_value:        '+'REALNUM | '-'REALNUM | REALNUM | '\'' letter'\'' // letter是啥。。。怎么还用单引号引起来了
-var_declarations:   VAR var_declaration ';' |
+                    IDENTIFIER '=' const_value;
+const_value:        '+'REALNUM | '-'REALNUM | REALNUM | '\'' letter'\'' // letter是啥。。。怎么还用单引号引起来了;
+var_declarations:   | VAR var_declaration ';' ;
 var_declaration:    var_declaration ';' idlist ':' type |
-                    idlist ':' type
+                    idlist ':' type;
 type:               basic_type |
-                    ARRAY [ period ] OF basic_type
-basic_type:         INTEGER | REAL | BOOLEAN | CHAR
+                    ARRAY [ period ] OF basic_type;
+basic_type:         INTEGER | REAL | BOOLEAN | CHAR;
 period:             period ',' INTNUM DOTDOT INTNUM |
-                    INTNUM DOTDOT INTNUM
+                    INTNUM DOTDOT INTNUM;
 
 //这部分先没看懂啥含义，注释符号可能有错误
 //subprogram_declarations: subprogram_declarations subprogram ';' |
