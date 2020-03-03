@@ -58,6 +58,8 @@ void ast_node_attr_destroy(ASTNodeAttr *attr) {
         case ATTR_KIND_STRING:
             sdsfree((sds) attr);
             break;
+        default:
+            break;
     }
     free(attr);
 }
@@ -99,6 +101,18 @@ ASTNode *ast_node_create(const char *type, ASTNodePos *pos) {
 //    assert(pos != NULL && "node pos should not be null");
     ASTNode *node = malloc(sizeof(ASTNode));
     node->pos = pos;
+    node->type = type;
+    node->first_attr = NULL;
+    node->next = NULL;
+    node->prev = NULL;
+    return node;
+}
+
+ASTNode *ast_node_create_without_pos(const char *type) {
+    assert(type != NULL && "node type should not be null");
+//    assert(pos != NULL && "node pos should not be null");
+    ASTNode *node = malloc(sizeof(ASTNode));
+    node->pos = NULL;
     node->type = type;
     node->first_attr = NULL;
     node->next = NULL;

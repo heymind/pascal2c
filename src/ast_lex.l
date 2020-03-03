@@ -3,8 +3,7 @@
     #include <string.h>
     #include "y.tab.h"
     //初始化变量最大长度
-    #define MAXSTR 20
-    
+    #define MAXSTR 200
     //用于记录行号
     int LINE_NUM = 1;
     //用于传递变量值
@@ -17,11 +16,15 @@
 */
 %%
 
-[Bb][Ee][Gg][iI][Nn]		    {return BEGIN;}
+[Bb][Ee][Gg][iI][Nn]		    {return START;}
 [Ee][Nn][Dd]					{return END;}
 [Pp][Rr][oO][Gg][Rr][Aa][Mm]	{return PROGRAM;}
+[Cc][Oo][Nn][Ss][Tt]            {return CONST;}
 [Vv][Aa][Rr]					{return VAR;}
 [Ii][nN][Tt][Ee][Gg][Ee][Rr]	{return INTEGER;}
+[Rr][Ee][Aa][lL]			    {return REAL;}
+[Bb][Oo][Oo][Ll][Ee][Aa][Nn]	{return BOOLEAN;}
+[Cc][Hh][Aa][Rr]                {return CHAR;}
 [Rr][Ee][Aa][lL]			    {return REAL;}
 [Ww][Hh][Ii][Ll][Ee]		    {return WHILE;}
 [Dd][oO]					    {return DO;}
@@ -84,29 +87,7 @@
 .						        {printf("Invalid char %s at line: %d\n", yytext, LINE_NUM);exit(1); }
 
 %%
-int main(int argc, char** argv)
-{
-	int c;
-	FILE *pout;
 
-	yyin = stdin;
-	if(argc>1) {
-		if((yyin=fopen(argv[1],"r"))==NULL) {
-			printf("Can't open file %s\n",argv[1]);
-			return -1;
-		}
-	}
-
-	pout=fopen("rslt.dat","w");
-	while((c=yylex())) {
-  	static int i=0;
-   	fprintf(pout,"(%4d,  %s)\t", c, yytext); i++;
-   	if( i==i/4*4) fprintf(pout,"\n");
-  }
-	fprintf(pout,"\n");
-	fclose(pout);
-	return 0;
-}
 #ifndef yywrap
     int yywrap()
     {

@@ -59,6 +59,7 @@ ASTNodePos *ast_node_pos_create(int start, int end, int col, int row);
  * @return ASTNode Object
  */
 ASTNode *ast_node_create(const char *type, ASTNodePos *pos);
+ASTNode *ast_node_create_without_pos(const char *type);
 
 /**
  * Destroy an AST Object and free the heap memory allocated for it ( including sub-objs, attr objs ... )
@@ -80,7 +81,7 @@ ASTNodeAttr *ast_node_attr_create_integer(const char *key, int val);
  * @param val the attribute value
  * @return ASTNodeAttr Object
  */
-ASTNodeAttr *ast_node_attr_create_const_str(const const char *key, char *val);
+ASTNodeAttr *ast_node_attr_create_const_str(const char *key, char *val);
 
 /**
  * Create a string attribute object

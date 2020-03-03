@@ -1,0 +1,6 @@
+program loop2;
+VAR i,x:integer;
+BEGIN
+i:=x;
+x:=i;
+END.
