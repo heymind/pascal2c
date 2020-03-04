@@ -22,7 +22,7 @@ void do_generate(ASTNode *node, FILE *out) {
         }
         fprintf(out,")");
     } else if (strcmp(type, "PROGRAM_BODY") == 0) {
-        printf("TODO:TRANSLATE `PROGRAM_BODY`\n000");
+        printf("TODO:TRANSLATE `PROGRAM_BODY`\n");
     } else if (strcmp(type, "IDLIST") == 0) {
         printf("TODO:TRANSLATE `IDLIST`\n");
     } else if (strcmp(type, "CONST_DECLARATIONS") == 0) {
