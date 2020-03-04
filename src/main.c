@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "utlist.h"
 #include "ast.h"
+#include "codegen.h"
 extern FILE* yyin;
 int yyparse();
 ASTNode *root = NULL;
@@ -28,6 +29,7 @@ int main(int argc, char* argv[]) {
     yyparse();
 //    printf("%s", root->first_attr->value);
     ast_node_dump_json(root, "step0.json");
+    generate_c_code(root,stdout);
 //        ASTNode *program_node = _ast_node_create("PROGRAM");
 //        ast_node_set_attr_str(program_node, "NAME", sdsnew("loop2"));
 //
