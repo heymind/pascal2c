@@ -182,6 +182,8 @@ void ast_node_set_attr_const_str(ASTNode *node, const char *key, const char *val
  */
 void ast_node_attr_node_append(ASTNode *node, const char *key, ASTNode *sub_node);
 
+void ast_node_attr_append(ASTNodeAttr *attr, ASTNodeAttr *sub_attr);
+
 void _ast_node_attr_dump_fp(ASTNodeAttr *head, FILE *fp);
 
 void _ast_node_dump_fp(ASTNode *head, FILE *fp);

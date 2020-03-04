@@ -1,7 +1,8 @@
 inp = """program_struct: program_head T_SEMICOLON program_body T_DOT
 program_head: T_PROGRAM T_ID T_OBRACKET idlist T_CBRACKET | T_PROGRAM T_ID
 program_body: const_declarations var_declarations subprogram_declarations compound_statement
-idlist: idlist T_COMMA T_ID | T_ID
+idlist: idlist_ T_COMMA T_ID 
+idlist_: idlist_ T_COMMA T_ID | T_ID
 const_declarations: T_CONST const_declaration T_SEMICOLON |
 const_declaration: const_declaration T_SEMICOLON T_ID T_EQ const_value | T_ID T_EQ const_value
 const_value: T_PLUS T_NUM | T_MINUS T_NUM | T_NUM
@@ -12,22 +13,26 @@ subprogram_declarations: subprogram_declarations subprogram T_SEMICOLON |
 subprogram: subprogram_head T_SEMICOLON subprogram_body
 subprogram_head: T_PROCEDURE T_ID formal_parameter| T_FUNCTION T_ID formal_parameter T_COLON T_BASIC_TYPE
 formal_parameter: T_OBRACKET parameter_list T_CBRACKET |
-parameter_list:parameter_list T_SEMICOLON parameter| parameter
+parameter_list: parameter parameter_list_
+parameter_list_: T_SEMICOLON parameter parameter_list_ |
 parameter: var_parameter | value_parameter
 var_parameter: T_VAR value_parameter
 value_parameter: idlist T_COLON T_BASIC_TYPE
 subprogram_body: const_declarations var_declarations compound_statement
 compound_statement:T_BEGIN statement_list T_END
-statement_list:statement_list T_SEMICOLON statement | statement
+statement_list: statement statement_list_
+statement_list_: T_SEMICOLON statement statement_list_ |
 statement: variable T_ASSIGNOP expression| procedure_call| compound_statement| T_IF expression T_THEN statement else_part| T_FOR T_ID T_ASSIGNOP expression T_TO expression T_DO statement| T_READ T_OBRACKET variable_list T_CBRACKET | T_WRITE T_OBRACKET expression_list T_CBRACKET |
-variable_list: variable_list T_COMMA variable| variable
+variable_list: variable variable_list_
+variable_list_: T_COMMA variable variable_list_ |
 variable: T_ID
 procedure_call: T_ID | T_ID T_OBRACKET expression_list T_CBRACKET
 else_part: T_ELSE statement |
 relop: T_CGT |T_CLT|T_CEQ|T_CNE|T_CGE|T_CLE
 addop: T_PLUS | T_MINUS | T_OR
 mulop: T_AND | T_MOD | T_DIV | T_MUL |
-expression_list:expression_list T_COMMA expression | expression
+expression_list: expression expression_list_
+expression_list_: T_COMMA expression expression_list_ |
 expression:simple_expression relop simple_expression| simple_expression
 simple_expression:simple_expression addop term | term
 term:term mulop factor | factor

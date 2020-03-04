@@ -171,6 +171,10 @@ void ast_node_attr_node_append(ASTNode *node, const char *key, ASTNode *sub_node
 
 }
 
+void ast_node_attr_append(ASTNodeAttr *attr, ASTNodeAttr *sub_attr){
+    assert(attr != NULL && "attr node should not be null");
+    attr->next = sub_attr;
+}
 
 void ast_node_attach_attr(ASTNode *node, ASTNodeAttr *attr) {
     assert(node != NULL && "ast node in attr should not be null");
@@ -299,12 +303,13 @@ void _ast_node_attr_dump_fp(ASTNodeAttr *head, FILE *fp) {
                 fprintf(fp, "\"%s\"", (char *) attr->value);
                 break;
 
+
             case ATTR_KIND_AST_NODE:
                 assert(attr->value != NULL);
                 _ast_node_dump_fp((ASTNode *) (attr->value), fp);
                 break;
         }
-    };
+    }
     fprintf(fp, "}");
 }
 
@@ -314,6 +319,27 @@ void _ast_node_dump_fp(ASTNode *head, FILE *fp) {
     fprintf(fp, "[");
     DL_FOREACH(head, node) {
         if (node != head) fprintf(fp, ",");
+        if(strstr(node->type, "LIST")){
+            ASTNodeAttr *attr = NULL;
+            DL_FOREACH(node->first_attr, attr){
+                if (attr != node->first_attr) fprintf(fp, ",");
+                fprintf(fp, "{\"type\":\"%s\",\"attrs\":",
+                        node->type
+                );
+                ASTNodeAttr *attr_ = malloc(sizeof(ASTNodeAttr));
+                *attr_ = *attr;
+                attr_->next = NULL;
+                _ast_node_attr_dump_fp(attr_, fp);
+                free(attr_);
+                fprintf(fp, "}");
+            }
+        } else{
+            fprintf(fp, "{\"type\":\"%s\",\"attrs\":",
+                    node->type
+            );
+            _ast_node_attr_dump_fp(node->first_attr, fp);
+            fprintf(fp, "}");
+        }
 //        fprintf(fp, "{\"type\":\"%s\",\"start\":%d,\"end\":%d,\"row\":%d,\"col\":%d,\"attrs\":",
 //                node->type,
 //                node->pos->start,
@@ -321,12 +347,7 @@ void _ast_node_dump_fp(ASTNode *head, FILE *fp) {
 //                node->pos->row,
 //                node->pos->col
 //        );
-        fprintf(fp, "{\"type\":\"%s\",\"attrs\":",
-                node->type
-        );
-        _ast_node_attr_dump_fp(node->first_attr, fp);
-        fprintf(fp, "}");
-    };
+    }
     fprintf(fp, "]");
 }
 

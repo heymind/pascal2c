@@ -16,6 +16,7 @@ extern ASTNode *root;
 %union {
     char* text;
     ASTNode *node;
+    ASTNodeAttr *attr;
 }
 
 %left  T_OR
@@ -41,7 +42,7 @@ extern ASTNode *root;
 
 //This are the keywords that we're gonna use accross the grammar
 %type <node> program_struct program_head program_body idlist const_declarations const_declaration const_value var_declarations var_declaration type subprogram_declarations subprogram subprogram_head formal_parameter parameter_list parameter var_parameter value_parameter subprogram_body compound_statement statement_list statement variable_list variable procedure_call else_part relop addop mulop expression_list expression simple_expression term factor
-
+%type <attr> idlist_ parameter_list_ statement_list_ variable_list_ expression_list_
 
 %%
 program_struct:program_head T_SEMICOLON program_body T_DOT
@@ -82,20 +83,21 @@ program_body:const_declarations var_declarations subprogram_declarations compoun
         $$ = node;
     }
 
-idlist:idlist T_COMMA T_ID
-    {
-        ASTNode *node = ast_node_create_without_pos("IDLIST");
-        ast_node_attr_node_append(node,"IDLIST",$1);
-
-        ast_node_set_attr_str(node,"ID",$3);
-        $$ = node;
-    }
-    |T_ID
+idlist: T_ID idlist_
     {
         ASTNode *node = ast_node_create_without_pos("IDLIST");
         ast_node_set_attr_str(node,"ID",$1);
+        ast_node_attr_append(node->first_attr, $2);
         $$ = node;
     }
+
+idlist_:T_COMMA T_ID idlist_
+    {
+	ASTNodeAttr *attr = ast_node_attr_create_str("ID", $2);
+        ast_node_attr_append(attr, $3);
+        $$ = attr;
+    }
+    |{$$ = NULL;}
 
 const_declarations:T_CONST const_declaration T_SEMICOLON
     {
@@ -227,20 +229,23 @@ formal_parameter:T_OBRACKET parameter_list T_CBRACKET
         $$ = node;
     }
     |{$$=NULL;}
-parameter_list:parameter_list T_SEMICOLON parameter
-    {
-        ASTNode *node = ast_node_create_without_pos("PARAMETER_LIST");
-        ast_node_attr_node_append(node,"PARAMETER_LIST",$1);
 
-        ast_node_attr_node_append(node,"PARAMETER",$3);
-        $$ = node;
-    }
-    |parameter
+parameter_list:parameter parameter_list_
     {
         ASTNode *node = ast_node_create_without_pos("PARAMETER_LIST");
-        ast_node_attr_node_append(node,"PARAMETER",$1);
+        ASTNodeAttr *attr = ast_node_attr_create_node("PARAMETER",$1);
+        node->first_attr = attr;
+        ast_node_attr_append(node->first_attr,$2);
         $$ = node;
     }
+
+parameter_list_:T_SEMICOLON parameter parameter_list_
+    {
+	ASTNodeAttr *attr = ast_node_attr_create_node("PARAMETER",$2);
+        ast_node_attr_append(attr, $3);
+        $$ = attr;
+    }
+    |{$$=NULL;}
 
 parameter:var_parameter
     {
@@ -290,20 +295,22 @@ compound_statement:T_BEGIN statement_list T_END
         $$ = node;
     }
 
-statement_list:statement_list T_SEMICOLON statement
+statement_list:statement statement_list_
     {
         ASTNode *node = ast_node_create_without_pos("STATEMENT_LIST");
-        ast_node_attr_node_append(node,"STATEMENT_LIST",$1);
+        ASTNodeAttr *attr = ast_node_attr_create_node("STATEMENT",$1);
+        node->first_attr = attr;
+        ast_node_attr_append(node->first_attr,$2);
+        $$ = node;
+    }
 
-        ast_node_attr_node_append(node,"STATEMENT",$3);
-        $$ = node;
-    }
-    |statement
+statement_list_:T_SEMICOLON statement statement_list_
     {
-        ASTNode *node = ast_node_create_without_pos("STATEMENT_LIST");
-        ast_node_attr_node_append(node,"STATEMENT",$1);
-        $$ = node;
+        ASTNodeAttr *attr = ast_node_attr_create_node("STATEMENT",$2);
+        ast_node_attr_append(attr, $3);
+        $$ = attr;
     }
+    |{$$=NULL;}
 
 statement:variable T_ASSIGNOP expression
     {
@@ -367,20 +374,24 @@ statement:variable T_ASSIGNOP expression
         $$ = node;
     }
     |{$$=NULL;}
-variable_list:variable_list T_COMMA variable
-    {
-        ASTNode *node = ast_node_create_without_pos("VARIABLE_LIST");
-        ast_node_attr_node_append(node,"VARIABLE_LIST",$1);
 
-        ast_node_attr_node_append(node,"VARIABLE",$3);
-        $$ = node;
-    }
-    |variable
+variable_list:variable variable_list_
     {
         ASTNode *node = ast_node_create_without_pos("VARIABLE_LIST");
-        ast_node_attr_node_append(node,"VARIABLE",$1);
+        ASTNodeAttr *attr = ast_node_attr_create_node("VARIABLE",$1);
+        node->first_attr = attr;
+        ast_node_attr_append(node->first_attr,$2);
         $$ = node;
     }
+
+variable_list_:T_COMMA variable variable_list_
+    {
+        ASTNodeAttr *attr = ast_node_attr_create_node("VARIABLE",$2);
+        ast_node_attr_append(attr, $3);
+        $$ = attr;
+    }
+    |{$$=NULL;}
+
 
 variable:T_ID
     {
@@ -494,20 +505,24 @@ mulop:T_AND
         $$ = node;
     }
     |{$$=NULL;}
-expression_list:expression_list T_COMMA expression
-    {
-        ASTNode *node = ast_node_create_without_pos("EXPRESSION_LIST");
-        ast_node_attr_node_append(node,"EXPRESSION_LIST",$1);
 
-        ast_node_attr_node_append(node,"EXPRESSION",$3);
-        $$ = node;
-    }
-    |expression
+expression_list:expression expression_list_
     {
         ASTNode *node = ast_node_create_without_pos("EXPRESSION_LIST");
-        ast_node_attr_node_append(node,"EXPRESSION",$1);
+        ASTNodeAttr *attr = ast_node_attr_create_node("EXPRESSION",$1);
+        node->first_attr = attr;
+        ast_node_attr_append(node->first_attr,$2);
         $$ = node;
     }
+
+expression_list_:T_COMMA expression expression_list_
+    {
+        ASTNodeAttr *attr = ast_node_attr_create_node("EXPRESSION",$2);
+        ast_node_attr_append(attr, $3);
+        $$ = attr;
+    }
+    |{$$=NULL;}
+
 
 expression:simple_expression relop simple_expression
     {
