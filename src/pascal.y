@@ -30,9 +30,9 @@ extern ASTNode *root;
 //This collection of tokens are related to the keywords reserved by Pascal such as begin, end, etc. More information pascal.l file
 %token   T_PROGRAM T_VAR T_PROCEDURE T_FUNCTION T_BEGIN T_END
 %token   T_IF T_THEN T_ELSE T_WHILE T_FOR T_TO T_DO
-%token   T_ASSIGNOP T_OBRACKET T_CBRACKET T_SEMICOLON T_COLON T_COMMA T_DOT
+%token   T_ASSIGNOP T_OBRACKET T_CBRACKET T_SOBRACKET T_SCBRACKET T_SEMICOLON T_COLON T_COMMA T_DOT
 %token   T_WRITE_INT T_WRITE_CHAR T_WRITE_BOOL T_WRITE_LN
-%token   T_CONST T_READ T_WRITE T_EQ
+%token   T_CONST T_READ T_WRITE T_EQ T_ARRAY T_OF
 
 //This tokens has special types because they are related to real information to use and they are not constants like IF or OR, they mean Regular Expressions
 %token <text> T_BASIC_TYPE
@@ -41,8 +41,8 @@ extern ASTNode *root;
 
 
 //This are the keywords that we're gonna use accross the grammar
-%type <node> program_struct program_head program_body idlist const_declarations const_declaration const_value var_declarations var_declaration type subprogram_declarations subprogram subprogram_head formal_parameter parameter_list parameter var_parameter value_parameter subprogram_body compound_statement statement_list statement variable_list variable procedure_call else_part relop addop mulop expression_list expression simple_expression term factor
-%type <attr> idlist_ parameter_list_ statement_list_ variable_list_ expression_list_
+%type <node> program_struct program_head program_body idlist const_declarations const_declaration const_value var_declarations var_declaration type subprogram_declarations subprogram subprogram_head formal_parameter parameter_list parameter var_parameter value_parameter subprogram_body compound_statement statement_list statement variable_list variable procedure_call else_part relop addop mulop expression_list expression simple_expression term factor period_list period
+%type <attr> idlist_ parameter_list_ statement_list_ variable_list_ expression_list_ period_list_
 
 %%
 program_struct:program_head T_SEMICOLON program_body T_DOT
@@ -181,6 +181,40 @@ type:T_BASIC_TYPE
         ASTNode *node = ast_node_create_without_pos("TYPE");
         ast_node_set_attr_str(node,"BASIC_TYPE",$1);
         $$ = node;
+    }
+    | T_ARRAY T_SOBRACKET period_list T_SCBRACKET T_OF T_BASIC_TYPE
+    {
+	ASTNode *node = ast_node_create_without_pos("ARRAY");
+	ast_node_set_attr_str(node,"BASIC_TYPE",$6);
+        ast_node_attr_node_append(node,"PERIOD_LIST",$3);
+        $$ = node;
+    }
+
+period_list: period period_list_
+    {
+	ASTNode *node = ast_node_create_without_pos("PERIOD_LIST");
+        ASTNodeAttr *attr = ast_node_attr_create_node("PERIOD",$1);
+        node->first_attr = attr;
+        ast_node_attr_append(node->first_attr,$2);
+        $$ = node;
+    }
+
+period_list_: T_COMMA period period_list_
+    {
+	ASTNodeAttr *attr = ast_node_attr_create_node("PERIOD",$2);
+        ast_node_attr_append(attr, $3);
+        $$ = attr;
+    }
+    |{$$=NULL;}
+
+period: T_NUM T_DOT T_DOT T_NUM
+    {
+    	ASTNodeAttr *attr1 = ast_node_attr_create_str("PERIOD_BEGIN",$1);
+    	ASTNodeAttr *attr2 = ast_node_attr_create_str("PERIOD_END",$4);
+    	ASTNode *node = ast_node_create_without_pos("PERIOD");
+    	node->first_attr = attr1;
+    	ast_node_attr_append(node->first_attr, attr2);
+    	$$ = node;
     }
 
 subprogram_declarations:subprogram_declarations subprogram T_SEMICOLON

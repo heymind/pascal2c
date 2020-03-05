@@ -14,10 +14,12 @@ YYSTYPE yylval;
 "program"                   {yylval.text = sdsnew(yytext);  return T_PROGRAM; }
 "var"                       {yylval.text = sdsnew(yytext);  return T_VAR; }
 "integer"|"boolean"|"char"  {yylval.text = sdsnew(yytext);  return T_BASIC_TYPE; }
+"array"                     {yylval.text = sdsnew(yytext);  return T_ARRAY; }
 "procedure"                 {yylval.text = sdsnew(yytext);  return T_PROCEDURE; }
 "function"                  {yylval.text = sdsnew(yytext);  return T_FUNCTION; }
 "begin"                     {yylval.text = sdsnew(yytext);  return T_BEGIN; }
 "end"                       {yylval.text = sdsnew(yytext);  return T_END; }
+"of"                        {yylval.text = sdsnew(yytext);  return T_OF; }
 "writeInt"                  {yylval.text = sdsnew(yytext);  return T_WRITE_INT; }
 "writeBool"                 {yylval.text = sdsnew(yytext);  return T_WRITE_BOOL; }
 "writeChar"                 {yylval.text = sdsnew(yytext);  return T_WRITE_CHAR; }
@@ -32,6 +34,8 @@ YYSTYPE yylval;
 ":="                        {yylval.text = sdsnew(yytext);  return T_ASSIGNOP; }
 "("                         {yylval.text = sdsnew(yytext);  return T_OBRACKET; }
 ")"                         {yylval.text = sdsnew(yytext);  return T_CBRACKET; }
+"["                         {yylval.text = sdsnew(yytext);  return T_SOBRACKET; }
+"]"                         {yylval.text = sdsnew(yytext);  return T_SCBRACKET; }
 "+"                         {yylval.text = sdsnew(yytext);   return T_PLUS; }
 "-"                         {yylval.text = sdsnew(yytext);   return T_MINUS; }
 "*"                         {yylval.text = sdsnew(yytext);   return T_MUL; }
