@@ -31,13 +31,13 @@ extern ASTNode *root;
 %token   T_PROGRAM T_VAR T_PROCEDURE T_FUNCTION T_BEGIN T_END
 %token   T_IF T_THEN T_ELSE T_WHILE T_FOR T_TO T_DO
 %token   T_ASSIGNOP T_OBRACKET T_CBRACKET T_SOBRACKET T_SCBRACKET T_SEMICOLON T_COLON T_COMMA T_DOT
-%token   T_WRITE_INT T_WRITE_CHAR T_WRITE_BOOL T_WRITE_LN
-%token   T_CONST T_READ T_WRITE T_EQ T_ARRAY T_OF
+%token   T_CONST T_READ T_WRITE T_ARRAY T_OF
 
 //This tokens has special types because they are related to real information to use and they are not constants like IF or OR, they mean Regular Expressions
 %token <text> T_BASIC_TYPE
 %token <text> T_ID
 %token <text> T_NUM
+%token <text> T_REAL
 
 
 //This are the keywords that we're gonna use accross the grammar
@@ -108,7 +108,7 @@ const_declarations:T_CONST const_declaration T_SEMICOLON
         $$ = node;
     }
     |{$$=NULL;}
-const_declaration:const_declaration T_SEMICOLON T_ID T_EQ const_value
+const_declaration:const_declaration T_SEMICOLON T_ID T_CEQ const_value
     {
         ASTNode *node = ast_node_create_without_pos("CONST_DECLARATION");
         ast_node_attr_node_append(node,"CONST_DECLARATION",$1);
@@ -118,7 +118,7 @@ const_declaration:const_declaration T_SEMICOLON T_ID T_EQ const_value
         ast_node_attr_node_append(node,"CONST_VALUE",$5);
         $$ = node;
     }
-    |T_ID T_EQ const_value
+    |T_ID T_CEQ const_value
     {
         ASTNode *node = ast_node_create_without_pos("CONST_DECLARATION");
         ast_node_set_attr_str(node,"ID",$1);
@@ -127,24 +127,24 @@ const_declaration:const_declaration T_SEMICOLON T_ID T_EQ const_value
         $$ = node;
     }
 
-const_value:T_PLUS T_NUM
+const_value:T_PLUS T_REAL
     {
         ASTNode *node = ast_node_create_without_pos("CONST_VALUE");
 
-        ast_node_set_attr_str(node,"NUM",$2);
+        ast_node_set_attr_str(node,"REAL",$2);
         $$ = node;
     }
-    |T_MINUS T_NUM
+    |T_MINUS T_REAL
     {
         ASTNode *node = ast_node_create_without_pos("CONST_VALUE");
 
-        ast_node_set_attr_str(node,"NUM",$2);
+        ast_node_set_attr_str(node,"REAL",$2);
         $$ = node;
     }
-    |T_NUM
+    |T_REAL
     {
         ASTNode *node = ast_node_create_without_pos("CONST_VALUE");
-        ast_node_set_attr_str(node,"NUM",$1);
+        ast_node_set_attr_str(node,"REAL",$1);
         $$ = node;
     }
 
