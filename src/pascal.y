@@ -137,14 +137,14 @@ const_value:T_PLUS T_REAL
     {
         ASTNodePos * pos = ast_node_pos_create(lex_row_num, lex_column_num-yyleng, lex_row_num, lex_column_num);
         ASTNode *node = ast_node_create("CONST_VALUE",pos);
-        ast_node_set_attr_str(node,"REAL",$2);
+        ast_node_set_attr_str(node,"T_PLUS",$2);
         $$ = node;
     }
     |T_MINUS T_REAL
     {
         ASTNodePos * pos = ast_node_pos_create(lex_row_num, lex_column_num-yyleng, lex_row_num, lex_column_num);
         ASTNode *node = ast_node_create("CONST_VALUE",pos);
-        ast_node_set_attr_str(node,"REAL",$2);
+        ast_node_set_attr_str(node,"T_MINUS",$2);
         $$ = node;
     }
     |T_REAL
