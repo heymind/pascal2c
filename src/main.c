@@ -7,7 +7,7 @@ int yyparse();
 ASTNode *root = NULL;
 
 ASTNode*  _ast_node_create(const char *type){
-    ASTNodePos *pos = ast_node_pos_create(1,2,3,4);
+    ASTNodePos *pos = ast_node_pos_create(1,1,1,1); 
     return ast_node_create(type,pos);
 }
 
