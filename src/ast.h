@@ -25,8 +25,10 @@ struct ast_node_attr_t {
 };
 
 struct ast_node_pos_t {
-    int start, end;
-    int col, row;
+    int start_row;
+    int start_column;
+    int end_row;
+    int end_column;
 };
 
 struct ast_node_t {
