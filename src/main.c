@@ -5,6 +5,8 @@
 extern FILE* yyin;
 int yyparse();
 ASTNode *root = NULL;
+extern int lex_row_num;
+extern int lex_column_num;
 
 ASTNode*  _ast_node_create(const char *type){
     ASTNodePos *pos = ast_node_pos_create(1,1,1,1); 
@@ -93,6 +95,7 @@ int main(int argc, char* argv[]) {
 
 int yyerror(char *errstr)
 {
+    printf("(Ln %d, Col %d): ",lex_row_num,lex_column_num);
     printf(" %s\n", errstr);
     return 0;
 }
