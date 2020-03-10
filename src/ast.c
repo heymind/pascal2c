@@ -325,8 +325,8 @@ void _ast_node_dump_fp(ASTNode *head, FILE *fp) {
                 if (attr != node->first_attr) fprintf(fp, ",");
                 fprintf(fp, "{\"type\":\"%s\",", node->type);
                 if (node->pos != NULL){
-                    fprintf(fp, "{\"pos\":\"(%d,%d)->(%d,%d)\",", node->pos->start_row,node->pos->start_column,
-                        node->pos->end_row,node->pos->end_column);
+                    fprintf(fp, "\"pos\":\"(%d,%d)->(%d,%d)\",", node->pos->start_row, node->pos->start_column,
+                            node->pos->end_row, node->pos->end_column);
                 }
                 fprintf(fp, "\"attrs\":");
                 ASTNodeAttr *attr_ = malloc(sizeof(ASTNodeAttr));
@@ -339,8 +339,8 @@ void _ast_node_dump_fp(ASTNode *head, FILE *fp) {
         } else{
             fprintf(fp, "{\"type\":\"%s\",", node->type);
             if (node->pos != NULL){
-                fprintf(fp, "{\"pos\":\"(%d,%d)->(%d,%d)\",", node->pos->start_row,node->pos->start_column,
-                    node->pos->end_row,node->pos->end_column);
+                fprintf(fp, "\"pos\":\"(%d,%d)->(%d,%d)\",", node->pos->start_row, node->pos->start_column,
+                        node->pos->end_row, node->pos->end_column);
             }
             fprintf(fp, "\"attrs\":");
             _ast_node_attr_dump_fp(node->first_attr, fp);
