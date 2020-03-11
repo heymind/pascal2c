@@ -151,7 +151,7 @@ const_value:T_PLUS T_REAL
     {
         ASTNodePos * pos = ast_node_pos_create(lex_row_num, lex_column_num-yyleng, lex_row_num, lex_column_num);
         ASTNode *node = ast_node_create("CONST_VALUE",pos);
-        ast_node_set_attr_str(node,"REAL",$1);
+        ast_node_set_attr_str(node,"T_REAL",$1);
         $$ = node;
     }
 
@@ -473,42 +473,42 @@ else_part:T_ELSE statement
 relop:T_CGT
     {
         ASTNodePos * pos = ast_node_pos_create(lex_row_num, lex_column_num-yyleng, lex_row_num, lex_column_num);
-        ASTNode *node = ast_node_create("RELOP",pos);
+        ASTNode *node = ast_node_create("RELOP_CGT",pos);
         
         $$ = node;
     }
     |T_CLT
     {
         ASTNodePos * pos = ast_node_pos_create(lex_row_num, lex_column_num-yyleng, lex_row_num, lex_column_num);
-        ASTNode *node = ast_node_create("RELOP",pos);
+        ASTNode *node = ast_node_create("RELOP_CLT",pos);
         
         $$ = node;
     }
     |T_CEQ
     {
         ASTNodePos * pos = ast_node_pos_create(lex_row_num, lex_column_num-yyleng, lex_row_num, lex_column_num);
-        ASTNode *node = ast_node_create("RELOP",pos);
+        ASTNode *node = ast_node_create("RELOP_CEQ",pos);
 
         $$ = node;
     }
     |T_CNE
     {
         ASTNodePos * pos = ast_node_pos_create(lex_row_num, lex_column_num-yyleng, lex_row_num, lex_column_num);
-        ASTNode *node = ast_node_create("RELOP",pos);
+        ASTNode *node = ast_node_create("RELOP_CNE",pos);
 
         $$ = node;
     }
     |T_CGE
     {
         ASTNodePos * pos = ast_node_pos_create(lex_row_num, lex_column_num-yyleng, lex_row_num, lex_column_num);
-        ASTNode *node = ast_node_create("RELOP",pos);
+        ASTNode *node = ast_node_create("RELOP_CGE",pos);
 
         $$ = node;
     }
     |T_CLE
     {
         ASTNodePos * pos = ast_node_pos_create(lex_row_num, lex_column_num-yyleng, lex_row_num, lex_column_num);
-        ASTNode *node = ast_node_create("RELOP",pos);
+        ASTNode *node = ast_node_create("RELOP_CLE",pos);
 
         $$ = node;
     }
@@ -516,21 +516,21 @@ relop:T_CGT
 addop:T_PLUS
     {
         ASTNodePos * pos = ast_node_pos_create(lex_row_num, lex_column_num-yyleng, lex_row_num, lex_column_num);
-        ASTNode *node = ast_node_create("ADDOP",pos);
+        ASTNode *node = ast_node_create("ADDOP_PLUS",pos);
 
         $$ = node;
     }
     |T_MINUS
     {
         ASTNodePos * pos = ast_node_pos_create(lex_row_num, lex_column_num-yyleng, lex_row_num, lex_column_num);
-        ASTNode *node = ast_node_create("ADDOP",pos);
+        ASTNode *node = ast_node_create("ADDOP_MINUS",pos);
 
         $$ = node;
     }
     |T_OR
     {
         ASTNodePos * pos = ast_node_pos_create(lex_row_num, lex_column_num-yyleng, lex_row_num, lex_column_num);
-        ASTNode *node = ast_node_create("ADDOP",pos);
+        ASTNode *node = ast_node_create("ADDOP_OR",pos);
 
         $$ = node;
     }
@@ -538,28 +538,28 @@ addop:T_PLUS
 mulop:T_AND
     {
         ASTNodePos * pos = ast_node_pos_create(lex_row_num, lex_column_num-yyleng, lex_row_num, lex_column_num);
-        ASTNode *node = ast_node_create("MULOP",pos);
+        ASTNode *node = ast_node_create("MULOP_AND",pos);
 
         $$ = node;
     }
     |T_MOD
     {
         ASTNodePos * pos = ast_node_pos_create(lex_row_num, lex_column_num-yyleng, lex_row_num, lex_column_num);
-        ASTNode *node = ast_node_create("MULOP",pos);
+        ASTNode *node = ast_node_create("MULOP_MOD",pos);
 
         $$ = node;
     }
     |T_DIV
     {
         ASTNodePos * pos = ast_node_pos_create(lex_row_num, lex_column_num-yyleng, lex_row_num, lex_column_num);
-        ASTNode *node = ast_node_create("MULOP",pos);
+        ASTNode *node = ast_node_create("MULOP_DIV",pos);
 
         $$ = node;
     }
     |T_MUL
     {
         ASTNodePos * pos = ast_node_pos_create(lex_row_num, lex_column_num-yyleng, lex_row_num, lex_column_num);
-        ASTNode *node = ast_node_create("MULOP",pos);
+        ASTNode *node = ast_node_create("MULOP_MUL",pos);
 
         $$ = node;
     }
