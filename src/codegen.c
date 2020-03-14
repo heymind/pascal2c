@@ -46,16 +46,26 @@ void do_generate(ASTNode *node, FILE *out) {
         fprintf(out,";\n");
     } else if (strcmp(type, "TYPE") == 0) {
         char *var_type_second = ast_node_get_attr_str_value(node,"BASIC_TYPE");
-        if (strcmp(var_type_second, "integer") == 0) {
+        if (!strcmp(var_type_second, "integer") || !strcmp(var_type_second, "boolean")) {
             fprintf(out, "int ");
         }
-//        printf("TODO:ADD NEW TYPE\n");
+        if (strcmp(var_type_second, "real") == 0) {
+            fprintf(out, "double ");
+        }
+        if (strcmp(var_type_second, "char") == 0) {
+            fprintf(out, "char ");
+        }
     } else if (strcmp(type, "ARRAY") == 0) {
         char *var_type_second = ast_node_get_attr_str_value(node,"BASIC_TYPE");
-        if (strcmp(var_type_second, "integer") == 0) {
+        if (!strcmp(var_type_second, "integer") || !strcmp(var_type_second, "boolean")) {
             fprintf(out, "int ");
         }
-//        printf("TODO:ADD NEW TYPE\n");
+        if (strcmp(var_type_second, "real") == 0) {
+            fprintf(out, "double ");
+        }
+        if (strcmp(var_type_second, "char") == 0) {
+            fprintf(out, "char ");
+        }
     } else if (strcmp(type, "PERIOD_LIST") == 0) {
 //        printf(node->type);
         for (ASTNodeAttr *cur = node->first_attr; cur; (cur) = (cur)->next){
@@ -63,7 +73,7 @@ void do_generate(ASTNode *node, FILE *out) {
 //            printf(period_node->type);
             char *period_begin = ast_node_get_attr_str_value(period_node,"PERIOD_BEGIN");
             char *period_end = ast_node_get_attr_str_value(period_node,"PERIOD_END");
-            fprintf(out,"[%d]",atoi(period_end) - atoi(period_begin));
+            fprintf(out,"[%d]",atoi(period_end) - atoi(period_begin)+1);
         }
     } else if (strcmp(type, "SUBPROGRAM_DECLARATIONS") == 0) {
         do_generate(ast_node_get_attr_node_value(node,"SUBPROGRAM_DECLARATIONS"),out);

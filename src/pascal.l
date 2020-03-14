@@ -13,46 +13,47 @@ unsigned int lex_row_num = 1;
 %option nounput
 
 %%
-[Pp][Rr][Oo][Gg][Rr][Aa][Mm]                                                    {yylval.text = sdsnew(yytext); lex_column_num += yyleng; return T_PROGRAM   ; }
-[Cc][Oo][Nn][Ss][Tt]                                                            {yylval.text = sdsnew(yytext); lex_column_num += yyleng; return T_CONST   ; }
-[Vv][Aa][Rr]                                                                    {yylval.text = sdsnew(yytext); lex_column_num += yyleng; return T_VAR       ; }
-[Ii][Nn][Tt][Ee][Gg][Ee][Rr]|[Bb][Oo][Oo][Ll][Ee][Aa][Nn]|[Cc][Hh][Aa][Rr]      {yylval.text = sdsnew(yytext); lex_column_num += yyleng; return T_BASIC_TYPE; }
-[Aa][Rr][Rr][Aa][Yy]                                                            {yylval.text = sdsnew(yytext); lex_column_num += yyleng; return T_ARRAY     ; }
-[Pp][Rr][Oo][Cc][Ee][Dd][Uu][Rr][Ee]                                            {yylval.text = sdsnew(yytext); lex_column_num += yyleng; return T_PROCEDURE ; }
-[Ff][Uu][Nn][Cc][Tt][Ii][Oo][Nn]                                                {yylval.text = sdsnew(yytext); lex_column_num += yyleng; return T_FUNCTION  ; }
-[Bb][Ee][Gg][Ii][Nn]                                                            {yylval.text = sdsnew(yytext); lex_column_num += yyleng; return T_BEGIN     ; }
-[Ee][Nn][Dd]                                                                    {yylval.text = sdsnew(yytext); lex_column_num += yyleng; return T_END       ; }
-[Oo][Ff]                                                                        {yylval.text = sdsnew(yytext); lex_column_num += yyleng; return T_OF        ; }
-[Ii][Ff]                                                                   {yylval.text = sdsnew(yytext); lex_column_num += yyleng; return T_IF        ; }
-[Tt][Hh][Ee][Nn]                                                           {yylval.text = sdsnew(yytext); lex_column_num += yyleng; return T_THEN      ; }
-[Ee][Ll][Ss][Ee]                                                           {yylval.text = sdsnew(yytext); lex_column_num += yyleng; return T_ELSE      ; }
-[Ww][Hh][Ii][Ll][Ee]                                                       {yylval.text = sdsnew(yytext); lex_column_num += yyleng; return T_WHILE     ; }
-[Ff][Oo][Rr]                                                               {yylval.text = sdsnew(yytext); lex_column_num += yyleng; return T_FOR       ; }
-[Tt][Oo]                                                                   {yylval.text = sdsnew(yytext); lex_column_num += yyleng; return T_TO        ; }
-[Dd][Oo]                                                                   {yylval.text = sdsnew(yytext); lex_column_num += yyleng; return T_DO        ; }
-":="                  {yylval.text = sdsnew(yytext); lex_column_num += 2; return T_ASSIGNOP ; }
-"("                   {yylval.text = sdsnew(yytext); lex_column_num += 1; return T_OBRACKET ; }
-")"                   {yylval.text = sdsnew(yytext); lex_column_num += 1; return T_CBRACKET ; }
-"["                   {yylval.text = sdsnew(yytext); lex_column_num += 1; return T_SOBRACKET; }
-"]"                   {yylval.text = sdsnew(yytext); lex_column_num += 1; return T_SCBRACKET; }
-"+"                   {yylval.text = sdsnew(yytext); lex_column_num += 1; return T_PLUS     ; }
-"-"                   {yylval.text = sdsnew(yytext); lex_column_num += 1; return T_MINUS    ; }
-"*"                   {yylval.text = sdsnew(yytext); lex_column_num += 1; return T_MUL      ; }
-"/"                   {yylval.text = sdsnew(yytext); lex_column_num += 1; return T_DIV      ; }
-"mod"                 {yylval.text = sdsnew(yytext); lex_column_num += 3; return T_MOD      ; }
-"and"                 {yylval.text = sdsnew(yytext); lex_column_num += 3; return T_AND      ; }
-"or"                  {yylval.text = sdsnew(yytext); lex_column_num += 2; return T_OR       ; }
-"not"                 {yylval.text = sdsnew(yytext); lex_column_num += 3; return T_NOT      ; }
-">"                   {yylval.text = sdsnew(yytext); lex_column_num += 1; return T_CGT      ; }
-"<"                   {yylval.text = sdsnew(yytext); lex_column_num += 1; return T_CLT      ; }
-"="                   {yylval.text = sdsnew(yytext); lex_column_num += 1; return T_CEQ      ; }
-"<>"                  {yylval.text = sdsnew(yytext); lex_column_num += 2; return T_CNE      ; }
-">="                  {yylval.text = sdsnew(yytext); lex_column_num += 2; return T_CGE      ; }
-"<="                  {yylval.text = sdsnew(yytext); lex_column_num += 2; return T_CLE      ; }
-";"                   {yylval.text = sdsnew(yytext); lex_column_num += 1; return T_SEMICOLON; }
-":"                   {yylval.text = sdsnew(yytext); lex_column_num += 1; return T_COLON    ; }
-"."                   {yylval.text = sdsnew(yytext); lex_column_num += 1; return T_DOT      ; }
-","                   {yylval.text = sdsnew(yytext); lex_column_num += 1; return T_COMMA    ; }
+[Pp][Rr][Oo][Gg][Rr][Aa][Mm]                              {lex_column_num += yyleng; return T_PROGRAM    ; }
+[Cc][Oo][Nn][Ss][Tt]                                      {lex_column_num += yyleng; return T_CONST      ; }
+[Vv][Aa][Rr]                                              {lex_column_num += yyleng; return T_VAR        ; }
+[Ii][Nn][Tt][Ee][Gg][Ee][Rr]|[Bb][Oo][Oo][Ll][Ee][Aa][Nn] {yylval.text = sdsnew(yytext); lex_column_num += yyleng; return T_BASIC_TYPE ; }
+[Rr][Ee][Aa][Ll]|[Cc][Hh][Aa][Rr]                         {yylval.text = sdsnew(yytext); lex_column_num += yyleng; return T_BASIC_TYPE ; }
+[Aa][Rr][Rr][Aa][Yy]                                      {lex_column_num += yyleng; return T_ARRAY      ; }
+[Pp][Rr][Oo][Cc][Ee][Dd][Uu][Rr][Ee]                      {lex_column_num += yyleng; return T_PROCEDURE  ; }
+[Ff][Uu][Nn][Cc][Tt][Ii][Oo][Nn]                          {lex_column_num += yyleng; return T_FUNCTION   ; }
+[Bb][Ee][Gg][Ii][Nn]                                      {lex_column_num += yyleng; return T_BEGIN      ; }
+[Ee][Nn][Dd]                                              {lex_column_num += yyleng; return T_END        ; }
+[Oo][Ff]                                                  {lex_column_num += yyleng; return T_OF         ; }
+[Ii][Ff]                                                  {lex_column_num += yyleng; return T_IF         ; }
+[Tt][Hh][Ee][Nn]                                          {lex_column_num += yyleng; return T_THEN       ; }
+[Ee][Ll][Ss][Ee]                                          {lex_column_num += yyleng; return T_ELSE       ; }
+[Ww][Hh][Ii][Ll][Ee]                                      {lex_column_num += yyleng; return T_WHILE      ; }
+[Ff][Oo][Rr]                                              {lex_column_num += yyleng; return T_FOR        ; }
+[Tt][Oo]                                                  {lex_column_num += yyleng; return T_TO         ; }
+[Dd][Oo]                                                  {lex_column_num += yyleng; return T_DO         ; }
+":="                  {lex_column_num += 2; return T_ASSIGNOP ; }
+"("                   {lex_column_num += 1; return T_OBRACKET ; }
+")"                   {lex_column_num += 1; return T_CBRACKET ; }
+"["                   {lex_column_num += 1; return T_SOBRACKET; }
+"]"                   {lex_column_num += 1; return T_SCBRACKET; }
+"+"                   {lex_column_num += 1; return T_PLUS     ; }
+"-"                   {lex_column_num += 1; return T_MINUS    ; }
+"*"                   {lex_column_num += 1; return T_MUL      ; }
+"/"                   {lex_column_num += 1; return T_DIV      ; }
+"mod"                 {lex_column_num += 3; return T_MOD      ; }
+"and"                 {lex_column_num += 3; return T_AND      ; }
+"or"                  {lex_column_num += 2; return T_OR       ; }
+"not"                 {lex_column_num += 3; return T_NOT      ; }
+">"                   {lex_column_num += 1; return T_CGT      ; }
+"<"                   {lex_column_num += 1; return T_CLT      ; }
+"="                   {lex_column_num += 1; return T_CEQ      ; }
+"<>"                  {lex_column_num += 2; return T_CNE      ; }
+">="                  {lex_column_num += 2; return T_CGE      ; }
+"<="                  {lex_column_num += 2; return T_CLE      ; }
+";"                   {lex_column_num += 1; return T_SEMICOLON; }
+":"                   {lex_column_num += 1; return T_COLON    ; }
+"."                   {lex_column_num += 1; return T_DOT      ; }
+","                   {lex_column_num += 1; return T_COMMA    ; }
 [0-9]+                {yylval.text = sdsnew(yytext); lex_column_num += yyleng; return T_NUM      ; }
 [A-Za-z][A-Za-z0-9_]* {yylval.text = sdsnew(yytext); lex_column_num += yyleng; return T_ID       ; }
 [0-9]+|[0-9]+\.[0-9]+ {yylval.text = sdsnew(yytext); lex_column_num += yyleng; return T_REAL     ; }

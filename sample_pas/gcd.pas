@@ -1,7 +1,7 @@
 program example(input,output);
-var x,y:integer;
+var x,y:real;
 student:array[1..10, 1..50] of integer;
-function gcd(a,b:integer):integer;
+function gcd(a,b:integer):real;
 begin
 if b=0 then gcd:=a
 else gcd:=gcd(b, a mod b)
