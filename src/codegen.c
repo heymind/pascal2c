@@ -22,7 +22,7 @@ void do_generate(ASTNode *node, FILE *out) {
         do_generate(ast_node_get_attr_node_value(node,"VAR_DECLARATIONS"),out);
         do_generate(ast_node_get_attr_node_value(node,"SUBPROGRAM_DECLARATIONS"),out);
         do_generate(ast_node_get_attr_node_value(node,"COMPOUND_STATEMENT"),out);
-        fprintf(out,"\treturn 0;\n}\n");
+        fprintf(out,"\treturn;\n}\n");
     } else if (strcmp(type, "IDLIST") == 0) {
         for (ASTNodeAttr *cur = (node->first_attr); cur; (cur) = (cur)->next){
             fprintf(out,"%s",cur->value);
@@ -46,31 +46,13 @@ void do_generate(ASTNode *node, FILE *out) {
         fprintf(out,";\n");
     } else if (strcmp(type, "TYPE") == 0) {
         char *var_type_second = ast_node_get_attr_str_value(node,"BASIC_TYPE");
-        if (!strcmp(var_type_second, "integer") || !strcmp(var_type_second, "boolean")) {
-            fprintf(out, "int ");
-        }
-        if (strcmp(var_type_second, "real") == 0) {
-            fprintf(out, "double ");
-        }
-        if (strcmp(var_type_second, "char") == 0) {
-            fprintf(out, "char ");
-        }
+        fprintf(out, "%s ", var_type_change(var_type_second));
     } else if (strcmp(type, "ARRAY") == 0) {
         char *var_type_second = ast_node_get_attr_str_value(node,"BASIC_TYPE");
-        if (!strcmp(var_type_second, "integer") || !strcmp(var_type_second, "boolean")) {
-            fprintf(out, "int ");
-        }
-        if (strcmp(var_type_second, "real") == 0) {
-            fprintf(out, "double ");
-        }
-        if (strcmp(var_type_second, "char") == 0) {
-            fprintf(out, "char ");
-        }
+        fprintf(out, "%s ", var_type_change(var_type_second));
     } else if (strcmp(type, "PERIOD_LIST") == 0) {
-//        printf(node->type);
         for (ASTNodeAttr *cur = node->first_attr; cur; (cur) = (cur)->next){
             ASTNode *period_node = (ASTNode *) cur->value;
-//            printf(period_node->type);
             char *period_begin = ast_node_get_attr_str_value(period_node,"PERIOD_BEGIN");
             char *period_end = ast_node_get_attr_str_value(period_node,"PERIOD_END");
             fprintf(out,"[%d]",atoi(period_end) - atoi(period_begin)+1);
@@ -84,13 +66,10 @@ void do_generate(ASTNode *node, FILE *out) {
     } else if (strcmp(type, "SUBPROGRAM_HEAD") == 0) {
         fprintf(out, "\t");
         char *func_type = ast_node_get_attr_str_value(node,"BASIC_TYPE");
-        if (strcmp(func_type, "integer") == 0) {
-            fprintf(out, "int ");
-        }
+        fprintf(out, "%s ", var_type_change(func_type));
         fprintf(out,"%s(",ast_node_get_attr_str_value(node,"ID"));
         do_generate(ast_node_get_attr_node_value(node,"FORMAL_PARAMETER"),out);
         fprintf(out,"){\n");
-//        printf("TODO:ADD NEW TYPE\n");
     } else if (strcmp(type, "FORMAL_PARAMETER") == 0) {
         do_generate(ast_node_get_attr_node_value(node,"PARAMETER_LIST"),out);
     } else if (strcmp(type, "PARAMETER_LIST") == 0) {
@@ -105,14 +84,11 @@ void do_generate(ASTNode *node, FILE *out) {
         printf("TODO:TRANSLATE `VAR_PARAMETER`\n");
     } else if (strcmp(type, "VALUE_PARAMETER") == 0) {
         char *var_type = ast_node_get_attr_str_value(node,"BASIC_TYPE");
-        if (strcmp(var_type, "integer") == 0) {
-            var_type = "int";
-        }
+        var_type = var_type_change(var_type);
         for (ASTNodeAttr *cur = (ast_node_get_attr_node_value(node,"IDLIST")->first_attr); cur; (cur) = (cur)->next){
             fprintf(out,"%s %s",var_type, cur->value);
             if(cur != NULL && cur->next != NULL) fprintf(out,", ");
         }
-//        printf("TODO:ADD NEW TYPE\n");
     } else if (strcmp(type, "SUBPROGRAM_BODY") == 0) {
         do_generate(ast_node_get_attr_node_value(node,"CONST_DECLARATIONS"),out);
         do_generate(ast_node_get_attr_node_value(node,"VAR_DECLARATIONS"),out);
@@ -167,11 +143,7 @@ void do_generate(ASTNode *node, FILE *out) {
         printf("TODO:TRANSLATE `ID_VARPART`\n");
     } else if (strcmp(type, "PROCEDURE_CALL") == 0) {
         char *func_name = ast_node_get_attr_str_value(node,"ID");
-        if(strcmp(func_name,"read") == 0){
-            fprintf(out,"scanf");
-        } else if (strcmp(func_name,"write") == 0){
-            fprintf(out,"printf");
-        }
+        fprintf(out, func_name_change(func_name));
         if(ast_node_get_attr_node_value(node,"EXPRESSION_LIST")!=NULL){
             fprintf(out, "(");
             do_generate(ast_node_get_attr_node_value(node,"EXPRESSION_LIST"),out);
@@ -255,6 +227,43 @@ void do_generate(ASTNode *node, FILE *out) {
     } else {
         printf("UNKNOWN TYPE:%s\n", type);
     }
+}
+//参考自 https://blog.csdn.net/farmerjohnofzs/article/details/52268572
+char *var_type_change(char *pascal_var_type){
+    char *c_var_type;
+    if (!strcmp(pascal_var_type, "shortint")){
+        c_var_type = "short";
+    } else if (!strcmp(pascal_var_type, "integer") || !strcmp(pascal_var_type, "boolean")){
+        c_var_type = "int";
+    } else if (!strcmp(pascal_var_type, "longint")){
+        c_var_type = "long";
+    } else if (!strcmp(pascal_var_type, "int64")){
+        c_var_type = "long long";
+    } else if (!strcmp(pascal_var_type, "byte")){
+        c_var_type = "unsigned short";
+    } else if (!strcmp(pascal_var_type, "word")){
+        c_var_type = "unsigned int";
+    } else if (!strcmp(pascal_var_type, "dword")){
+        c_var_type = "unsigned long";
+    } else if (!strcmp(pascal_var_type, "qword")){
+        c_var_type = "unsigned long long";
+    } else if (!strcmp(pascal_var_type, "real")){
+        c_var_type = "float";
+    } else if (!strcmp(pascal_var_type, "double")){
+        c_var_type = "double";
+    } else if (!strcmp(pascal_var_type, "char")) {
+        c_var_type = "char";
+    }
+    return c_var_type;
+}
+char *func_name_change(char *pascal_func_name){
+    char *c_func_name;
+    if (!strcmp(pascal_func_name, "read")){
+        c_func_name = "scanf";
+    } else if (!strcmp(pascal_func_name, "write")){
+        c_func_name = "printf";
+    }
+    return c_func_name;
 }
 void generate_c_code(ASTNode *root, FILE *out) {
     assert(root != NULL && "ROOT SHOULD NOT BE NULL");
