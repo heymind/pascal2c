@@ -52,7 +52,8 @@ program_struct:program_head T_SEMICOLON program_body T_DOT
         ASTNode *node = ast_node_create_without_pos("PROGRAM_STRUCT");
         ast_node_attr_node_append(node,"PROGRAM_HEAD",$1);
 
-        ast_node_attr_node_append(node,"PROGRAM_BODY",$3);
+	ast_node_extend(node,$3);
+//        ast_node_attr_node_append(node,"PROGRAM_BODY",$3);
 
         root = node;
     }
