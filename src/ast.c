@@ -3,6 +3,7 @@
 //
 
 #include "ast.h"
+#include "utarray.h"
 #include <stdint.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -180,6 +181,30 @@ void ast_node_extend(ASTNode *origin, ASTNode *extended) {
 void ast_node_attr_append(ASTNodeAttr *attr, ASTNodeAttr *sub_attr) {
     assert(attr != NULL && "attr node should not be null");
     attr->next = sub_attr;
+}
+
+void ast_node_create_attr_list_append(ASTNode* list_main_node, const char *key, ASTNode* list_node){
+
+}
+
+UT_array* append_array_type(UT_array *types, char *string){
+    if(types == NULL){
+        utarray_new(types, &ut_str_icd);
+        utarray_push_back(types, &string);
+    }
+    else{
+        utarray_push_back(types, &string);
+    }
+    return types;
+}
+
+int find_array_type(UT_array *types, char *string){
+    char **p = NULL;
+    while ( (p=(char**)utarray_next(types, p))) {
+        if(strcmp(*p, string) == 0)
+            return 1;
+    }
+    return 0;
 }
 
 void ast_node_attach_attr(ASTNode *node, ASTNodeAttr *attr) {

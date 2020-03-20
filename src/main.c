@@ -103,7 +103,6 @@ int yyerror(char *errstr)
 {
     /* 带行列号的原版报错信息 */
     // printf("(Ln %d, Col %d): ", lex_row_num, lex_column_num);
-    // printf("%s\n", errstr);  
-
+    // printf("%s\n", errstr);
     print_error(errstr);
 }

@@ -7,6 +7,7 @@
 
 
 #include "sds.h"
+#include "utarray.h"
 #include <stdio.h>
 #include "string.h"
 
@@ -192,6 +193,9 @@ void _ast_node_attr_dump_fp(ASTNodeAttr *head, FILE *fp);
 
 void _ast_node_dump_fp(ASTNode *head, FILE *fp);
 
+UT_array* append_array_type(UT_array *types, char *string);
+
+int find_array_type(UT_array *types, char *string);
 
 /**
  * Dump the ast tree to a json file.

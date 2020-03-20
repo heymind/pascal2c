@@ -4,12 +4,14 @@
 #include <string.h>
 #include "ast.h"
 #include "sds.h"
+#include "utarray.h"
 extern int yylex();
 extern ASTNodePos *ast_node_pos_create(int start_row, int start_column, int end_row, int end_column);
 extern unsigned int lex_column_num;
 extern unsigned int lex_row_num;
 extern unsigned int yyleng;
 extern ASTNode *root;
+extern UT_array *new_types;
 %}
 
 %error-verbose
@@ -30,10 +32,11 @@ extern ASTNode *root;
 %left  T_NOT
 
 //This collection of tokens are related to the keywords reserved by Pascal such as begin, end, etc. More information pascal.l file
-%token   T_PROGRAM T_VAR T_PROCEDURE T_FUNCTION T_BEGIN T_END
+%token   T_PROGRAM T_TYPE T_VAR T_PROCEDURE T_FUNCTION T_BEGIN T_END
 %token   T_IF T_THEN T_ELSE T_WHILE T_FOR T_TO T_DO
 %token   T_ASSIGNOP T_OBRACKET T_CBRACKET T_SOBRACKET T_SCBRACKET T_SEMICOLON T_COLON T_COMMA T_DOT
-%token   T_CONST T_READ T_WRITE T_ARRAY T_OF
+%token   T_CONST T_READ T_WRITE T_OF
+%token   T_ARRAY T_RECORD
 
 //This tokens has special types because they are related to real information to use and they are not constants like IF or OR, they mean Regular Expressions
 %token <text> T_BASIC_TYPE
@@ -43,7 +46,7 @@ extern ASTNode *root;
 
 
 //This are the keywords that we're gonna use accross the grammar
-%type <node> program_struct program_head program_body idlist const_declarations const_declaration const_value var_declarations var_declaration type subprogram_declarations subprogram subprogram_head formal_parameter parameter_list parameter var_parameter value_parameter subprogram_body compound_statement statement_list statement variable_list variable procedure_call else_part relop addop mulop expression_list expression simple_expression term factor period_list period
+%type <node> program_struct program_head program_body idlist const_declarations const_declaration const_value type_declarations type_declaration type_declaration_ type_define var_declarations var_declaration var_declaration_ var_define var_records var_record var_record_ var_record_assign type subprogram_declarations subprogram subprogram_head formal_parameter parameter_list parameter var_parameter value_parameter subprogram_body compound_statement statement_list statement variable_list variable procedure_call else_part relop addop mulop expression_list expression simple_expression term factor period_list period
 %type <attr> idlist_ parameter_list_ statement_list_ variable_list_ expression_list_ period_list_
 
 %%
@@ -51,7 +54,6 @@ program_struct:program_head T_SEMICOLON program_body T_DOT
     {
         ASTNode *node = ast_node_create_without_pos("PROGRAM_STRUCT");
         ast_node_attr_node_append(node,"PROGRAM_HEAD",$1);
-
 	ast_node_extend(node,$3);
 //        ast_node_attr_node_append(node,"PROGRAM_BODY",$3);
 
@@ -76,13 +78,14 @@ program_head:T_PROGRAM T_ID T_OBRACKET idlist T_CBRACKET
         $$ = node;
     }
 
-program_body:const_declarations var_declarations subprogram_declarations compound_statement
+program_body:const_declarations type_declarations var_declarations subprogram_declarations compound_statement
     {
         ASTNode *node = ast_node_create_without_pos("PROGRAM_BODY");
         ast_node_attr_node_append(node,"CONST_DECLARATIONS",$1);
-        ast_node_attr_node_append(node,"VAR_DECLARATIONS",$2);
-        ast_node_attr_node_append(node,"SUBPROGRAM_DECLARATIONS",$3);
-        ast_node_attr_node_append(node,"COMPOUND_STATEMENT",$4);
+        ast_node_attr_node_append(node,"TYPE_DECLARATIONS",$2);
+        ast_node_attr_node_append(node,"VAR_DECLARATIONS",$3);
+        ast_node_attr_node_append(node,"SUBPROGRAM_DECLARATIONS",$4);
+        ast_node_attr_node_append(node,"COMPOUND_STATEMENT",$5);
         $$ = node;
     }
 
@@ -115,6 +118,7 @@ const_declarations:T_CONST const_declaration T_SEMICOLON
     |{
         $$=NULL; 
     }
+
 const_declaration:const_declaration T_SEMICOLON T_ID T_CEQ const_value
     {
         ASTNode *node = ast_node_create_without_pos("CONST_DECLARATION");
@@ -156,7 +160,54 @@ const_value:T_PLUS T_REAL
         $$ = node;
     }
 
-var_declarations:T_VAR var_declaration T_SEMICOLON
+type_declarations:T_TYPE type_declaration
+    {
+        ASTNode *node = ast_node_create_without_pos("TYPE_DECLARATIONS");
+
+        ast_node_attr_node_append(node,"TYPE_DECLARATIONS",$2);
+
+        $$ = node;
+    }
+    |{
+       	$$=NULL; //?
+    }
+
+type_declaration:type_define type_declaration_
+    {
+	ASTNode *node = ast_node_create_without_pos("TYPE_DECLARATION_LIST");
+        ASTNodeAttr *attr = ast_node_attr_create_node("TYPE_DEFINE",$1);
+        node->first_attr = attr;
+        ast_node_attr_append(node->first_attr,$2);
+        $$ = node;
+    }
+
+type_declaration_: type_define type_declaration_
+    {
+    	ASTNodeAttr *attr = ast_node_attr_create_node("TYPE_DEFINE",$1);
+        ast_node_attr_append(attr, $2);
+        $$ = attr;
+    }
+    |{$$=NULL;}
+
+type_define: T_ID T_CEQ T_RECORD var_declaration T_END T_SEMICOLON
+    {
+        ASTNode *node = ast_node_create_without_pos("RECORD");
+        ast_node_set_attr_str(node,"ID",$1);
+        new_types = append_array_type(new_types, $1);
+        ast_node_attr_node_append(node,"TYPE_RECORD_DECLARATION",$4);
+        $$ = node;
+    }
+    | T_ID T_CEQ T_ARRAY T_SOBRACKET period_list T_SCBRACKET T_OF T_BASIC_TYPE T_SEMICOLON
+    {
+    	ASTNode *node = ast_node_create_without_pos("ARRAY");
+    	ast_node_set_attr_str(node,"ID",$1);
+    	new_types = append_array_type(new_types, $1);
+    	ast_node_set_attr_str(node,"BASIC_TYPE",$8);
+        ast_node_attr_node_append(node,"PERIOD_LIST",$5);
+        $$ = node;
+    }
+
+var_declarations:T_VAR var_declaration
     {
         ASTNode *node = ast_node_create_without_pos("VAR_DECLARATIONS");
 
@@ -167,22 +218,63 @@ var_declarations:T_VAR var_declaration T_SEMICOLON
     |{
         $$=NULL; //?
     }
-var_declaration:var_declaration T_SEMICOLON idlist T_COLON type
+
+var_declaration:var_define var_declaration_
     {
-        ASTNode *node = ast_node_create_without_pos("VAR_DECLARATION");
-        ast_node_attr_node_append(node,"VAR_DECLARATION",$1);
-
-        ast_node_attr_node_append(node,"IDLIST",$3);
-
-        ast_node_attr_node_append(node,"TYPE",$5);
+	ASTNode *node = ast_node_create_without_pos("VAR_DECLARATION_LIST");
+        ASTNodeAttr *attr = ast_node_attr_create_node("VAR_DECLARATION",$1);
+        node->first_attr = attr;
+        ast_node_attr_append(node->first_attr,$2);
         $$ = node;
     }
-    |idlist T_COLON type
-    {
-        ASTNode *node = ast_node_create_without_pos("VAR_DECLARATION");
-        ast_node_attr_node_append(node,"IDLIST",$1);
 
+var_declaration_: var_define var_declaration_
+    {
+    	ASTNodeAttr *attr = ast_node_attr_create_node("VAR_DECLARATION",$1);
+        ast_node_attr_append(attr, $2);
+        $$ = attr;
+    }
+    |{$$ = NULL;}
+
+var_define: idlist T_COLON type T_SEMICOLON var_records
+    {
+    	ASTNode *node = ast_node_create_without_pos("VAR_DECLARATION");
+        ast_node_attr_node_append(node,"IDLIST",$1);
         ast_node_attr_node_append(node,"TYPE",$3);
+        $$ = node;
+    }
+
+var_records: T_BEGIN var_record T_END T_SEMICOLON
+    {
+         ASTNode *node = ast_node_create_without_pos("VAR_RECORDS");
+         ast_node_attr_node_append(node,"VAR_RECORDS",$2);
+         $$ = node;
+    }
+    |{$$ = NULL;}
+
+var_record:var_record_assign var_record_
+    {
+	ASTNode *node = ast_node_create_without_pos("VAR_RECORD_LIST");
+        ASTNodeAttr *attr = ast_node_attr_create_node("VAR_RECORD",$1);
+        node->first_attr = attr;
+        ast_node_attr_append(node->first_attr,$2);
+        $$ = node;
+    }
+
+var_record_: var_record_assign var_record_
+    {
+    	ASTNodeAttr *attr = ast_node_attr_create_node("VAR_RECORD",$1);
+        ast_node_attr_append(attr, $2);
+        $$ = attr;
+    }
+    |{$$ = NULL;}
+
+var_record_assign: T_ID T_DOT T_ID T_ASSIGNOP expression T_SEMICOLON
+    {
+    	ASTNode *node = ast_node_create_without_pos("RECORD_ASSIGN");
+        ast_node_set_attr_str(node,"RECORD_ID",$1);
+        ast_node_set_attr_str(node,"MEMBER_ID",$3);
+        ast_node_attr_node_append(node,"VALUE",$5);
         $$ = node;
     }
 
@@ -193,17 +285,20 @@ type:T_BASIC_TYPE
         ast_node_set_attr_str(node,"BASIC_TYPE",$1);
         $$ = node;
     }
-    | T_ARRAY T_SOBRACKET period_list T_SCBRACKET T_OF T_BASIC_TYPE
+    |T_ID
     {
-	ASTNode *node = ast_node_create_without_pos("ARRAY");
-	ast_node_set_attr_str(node,"BASIC_TYPE",$6);
-        ast_node_attr_node_append(node,"PERIOD_LIST",$3);
+    	ASTNodePos * pos = ast_node_pos_create(lex_row_num, lex_column_num-yyleng, lex_row_num, lex_column_num);
+        ASTNode *node = ast_node_create("TYPE",pos);
+	if(!find_array_type(new_types, $1)){
+	    yyerror("");
+	}
+        ast_node_set_attr_str(node,"BASIC_TYPE",$1);
         $$ = node;
     }
 
 period_list: period period_list_
     {
-	    ASTNode *node = ast_node_create_without_pos("PERIOD_LIST");
+	ASTNode *node = ast_node_create_without_pos("PERIOD_LIST");
         ASTNodeAttr *attr = ast_node_attr_create_node("PERIOD",$1);
         node->first_attr = attr;
         ast_node_attr_append(node->first_attr,$2);
@@ -322,7 +417,7 @@ value_parameter:idlist T_COLON T_BASIC_TYPE
         $$ = node;
     }
 
-subprogram_body:const_declarations var_declarations compound_statement
+subprogram_body:const_declarations type_declarations var_declarations compound_statement
     {
         ASTNode *node = ast_node_create_without_pos("SUBPROGRAM_BODY");
         ast_node_attr_node_append(node,"CONST_DECLARATIONS",$1);
