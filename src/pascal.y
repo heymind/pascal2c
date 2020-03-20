@@ -46,8 +46,8 @@ extern UT_array *new_types;
 
 
 //This are the keywords that we're gonna use accross the grammar
-%type <node> program_struct program_head program_body idlist const_declarations const_declaration const_value type_declarations type_declaration type_declaration_ type_define var_declarations var_declaration var_declaration_ var_define var_records var_record var_record_ var_record_assign type subprogram_declarations subprogram subprogram_head formal_parameter parameter_list parameter var_parameter value_parameter subprogram_body compound_statement statement_list statement variable_list variable procedure_call else_part relop addop mulop expression_list expression simple_expression term factor period_list period
-%type <attr> idlist_ parameter_list_ statement_list_ variable_list_ expression_list_ period_list_
+%type <node> program_struct program_head program_body idlist const_declarations const_declaration const_value type_declarations type_declaration type_define var_declarations var_declaration var_assign var_records var_record var_record_assign type subprogram_declarations subprogram subprogram_head formal_parameter parameter_list parameter var_parameter value_parameter subprogram_body compound_statement statement_list statement variable_list variable procedure_call else_part relop addop mulop expression_list expression simple_expression term factor period_list period
+%type <attr> idlist_ parameter_list_ statement_list_ variable_list_ expression_list_ period_list_ type_declaration_ var_declaration_ var_record_ subprogram_declarations_
 
 %%
 program_struct:program_head T_SEMICOLON program_body T_DOT
@@ -219,7 +219,7 @@ var_declarations:T_VAR var_declaration
         $$=NULL; //?
     }
 
-var_declaration:var_define var_declaration_
+var_declaration:var_assign var_declaration_
     {
 	ASTNode *node = ast_node_create_without_pos("VAR_DECLARATION_LIST");
         ASTNodeAttr *attr = ast_node_attr_create_node("VAR_DECLARATION",$1);
@@ -228,7 +228,7 @@ var_declaration:var_define var_declaration_
         $$ = node;
     }
 
-var_declaration_: var_define var_declaration_
+var_declaration_: var_assign var_declaration_
     {
     	ASTNodeAttr *attr = ast_node_attr_create_node("VAR_DECLARATION",$1);
         ast_node_attr_append(attr, $2);
@@ -236,7 +236,7 @@ var_declaration_: var_define var_declaration_
     }
     |{$$ = NULL;}
 
-var_define: idlist T_COLON type T_SEMICOLON var_records
+var_assign: idlist T_COLON type T_SEMICOLON var_records
     {
     	ASTNode *node = ast_node_create_without_pos("VAR_DECLARATION");
         ast_node_attr_node_append(node,"IDLIST",$1);
@@ -323,15 +323,23 @@ period: T_NUM T_DOT T_DOT T_NUM
     	$$ = node;
     }
 
-subprogram_declarations:subprogram_declarations subprogram T_SEMICOLON
+subprogram_declarations:subprogram T_SEMICOLON subprogram_declarations_
     {
-        ASTNode *node = ast_node_create_without_pos("SUBPROGRAM_DECLARATIONS");
-        ast_node_attr_node_append(node,"SUBPROGRAM_DECLARATIONS",$1);
-        ast_node_attr_node_append(node,"SUBPROGRAM",$2);
-
+	ASTNode *node = ast_node_create_without_pos("SUBPROGRAM_DECLARATIONS_LIST");
+        ASTNodeAttr *attr = ast_node_attr_create_node("SUBPROGRAM",$1);
+        node->first_attr = attr;
+        ast_node_attr_append(node->first_attr,$3);
         $$ = node;
     }
+
+subprogram_declarations_:subprogram T_SEMICOLON subprogram_declarations_
+    {
+    	ASTNodeAttr *attr = ast_node_attr_create_node("SUBPROGRAM",$1);
+        ast_node_attr_append(attr, $3);
+        $$ = attr;
+    }
     |{$$=NULL;}
+
 subprogram:subprogram_head T_SEMICOLON subprogram_body
     {
         ASTNode *node = ast_node_create_without_pos("SUBPROGRAM");
@@ -421,8 +429,9 @@ subprogram_body:const_declarations type_declarations var_declarations compound_s
     {
         ASTNode *node = ast_node_create_without_pos("SUBPROGRAM_BODY");
         ast_node_attr_node_append(node,"CONST_DECLARATIONS",$1);
-        ast_node_attr_node_append(node,"VAR_DECLARATIONS",$2);
-        ast_node_attr_node_append(node,"COMPOUND_STATEMENT",$3);
+   	ast_node_attr_node_append(node,"TYPE_DECLARATIONS",$2);
+        ast_node_attr_node_append(node,"VAR_DECLARATIONS",$3);
+        ast_node_attr_node_append(node,"COMPOUND_STATEMENT",$4);
         $$ = node;
     }
 
@@ -431,7 +440,6 @@ compound_statement:T_BEGIN statement_list T_END
         ASTNode *node = ast_node_create_without_pos("COMPOUND_STATEMENT");
 
         ast_node_attr_node_append(node,"STATEMENT_LIST",$2);
-
         $$ = node;
     }
 
@@ -485,14 +493,23 @@ statement:variable T_ASSIGNOP expression
     |T_FOR T_ID T_ASSIGNOP expression T_TO expression T_DO statement
     {
         ASTNode *node = ast_node_create_without_pos("STATEMENT");
-
         ast_node_set_attr_str(node,"ID",$2);
-
+        ast_node_set_attr_str(node,"TYPE", "FOR");
         ast_node_attr_node_append(node,"EXPRESSION",$4);
 
         ast_node_attr_node_append(node,"EXPRESSION",$6);
 
         ast_node_attr_node_append(node,"STATEMENT",$8);
+        $$ = node;
+    }
+    |T_WHILE T_ID relop expression T_DO statement
+    {
+    	ASTNode *node = ast_node_create_without_pos("STATEMENT");
+        ast_node_set_attr_str(node,"ID",$2);
+        ast_node_set_attr_str(node,"TYPE", "WHILE");
+        ast_node_attr_node_append(node,"RELATION_SYMBOL",$3);
+        ast_node_attr_node_append(node,"EXPRESSION",$4);
+        ast_node_attr_node_append(node,"STATEMENT",$6);
         $$ = node;
     }
     |T_READ T_OBRACKET variable_list T_CBRACKET

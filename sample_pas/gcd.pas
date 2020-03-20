@@ -16,10 +16,12 @@ VAR
   END;
 function gcd(a,b:integer):real;
 begin
-if b=0 then gcd:=a
-else gcd:=gcd(b, a mod b)
+  if b=0 then gcd:=a
+  else gcd:=gcd(b, a mod b);
+  while ch<>123 do
+    c:=c+1
 end;
 begin
-read(x, y, a, b, c);
+read(x, y);
 write(gcd(x, y))
 end.
