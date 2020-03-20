@@ -502,14 +502,12 @@ statement:variable T_ASSIGNOP expression
         ast_node_attr_node_append(node,"STATEMENT",$8);
         $$ = node;
     }
-    |T_WHILE T_ID relop expression T_DO statement
+    |T_WHILE expression T_DO statement
     {
     	ASTNode *node = ast_node_create_without_pos("STATEMENT");
-        ast_node_set_attr_str(node,"ID",$2);
         ast_node_set_attr_str(node,"TYPE", "WHILE");
-        ast_node_attr_node_append(node,"RELATION_SYMBOL",$3);
-        ast_node_attr_node_append(node,"EXPRESSION",$4);
-        ast_node_attr_node_append(node,"STATEMENT",$6);
+        ast_node_attr_node_append(node,"EXPRESSION",$2);
+        ast_node_attr_node_append(node,"STATEMENT",$4);
         $$ = node;
     }
     |T_READ T_OBRACKET variable_list T_CBRACKET
