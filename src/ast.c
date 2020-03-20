@@ -8,7 +8,22 @@
 #include <assert.h>
 #include <utlist.h>
 #include <stdio.h>
-
+// extern unsigned int lex_column_num;
+// extern unsigned int lex_row_num;
+// char pos_str[50] = "";
+// void pos_str_generator()
+// {
+//     int column = lex_column_num;
+//     int row = lex_row_num;
+//     char str[20];
+//     strcat(pos_str, "(Line ");
+//     sprintf(str, "%d", row);
+//     strcat(pos_str, str);
+//     strcat(pos_str, ", Column ");
+//     sprintf(str, "%d", column);
+//     strcat(pos_str, str);
+//     strcat(pos_str, ")");
+// }
 
 ASTNodePos *ast_node_pos_create(int start_row, int start_column, int end_row, int end_column) {
     ASTNodePos *pos = malloc(sizeof(ASTNodePos));
