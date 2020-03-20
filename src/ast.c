@@ -186,7 +186,13 @@ void ast_node_attr_node_append(ASTNode *node, const char *key, ASTNode *sub_node
 
 }
 
-void ast_node_attr_append(ASTNodeAttr *attr, ASTNodeAttr *sub_attr){
+void ast_node_extend(ASTNode *origin, ASTNode *extended) {
+    LL_CONCAT(origin->first_attr, extended->first_attr);
+    extended->first_attr = NULL;
+    ast_node_destroy(extended);
+}
+
+void ast_node_attr_append(ASTNodeAttr *attr, ASTNodeAttr *sub_attr) {
     assert(attr != NULL && "attr node should not be null");
     attr->next = sub_attr;
 }
