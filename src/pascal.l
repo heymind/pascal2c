@@ -3,9 +3,11 @@
 #include "sds.h"
 #include "ast.h"
 #include "y.tab.h"
+#include "utarray.h"
 YYSTYPE yylval;
 unsigned int lex_column_num = 0;
 unsigned int lex_row_num = 1;
+UT_array *new_types;
 %}
 
 %option yylineno
@@ -15,10 +17,12 @@ unsigned int lex_row_num = 1;
 %%
 [Pp][Rr][Oo][Gg][Rr][Aa][Mm]                              {lex_column_num += yyleng; return T_PROGRAM    ; }
 [Cc][Oo][Nn][Ss][Tt]                                      {lex_column_num += yyleng; return T_CONST      ; }
+[Tt][Yy][Pp][Ee]                                          {lex_column_num += yyleng; return T_TYPE      ; }
 [Vv][Aa][Rr]                                              {lex_column_num += yyleng; return T_VAR        ; }
 [Ii][Nn][Tt][Ee][Gg][Ee][Rr]|[Bb][Oo][Oo][Ll][Ee][Aa][Nn] {yylval.text = sdsnew(yytext); lex_column_num += yyleng; return T_BASIC_TYPE ; }
 [Rr][Ee][Aa][Ll]|[Cc][Hh][Aa][Rr]                         {yylval.text = sdsnew(yytext); lex_column_num += yyleng; return T_BASIC_TYPE ; }
 [Aa][Rr][Rr][Aa][Yy]                                      {lex_column_num += yyleng; return T_ARRAY      ; }
+[Rr][Ee][Cc][Oo][Rr][Dd]                                  {lex_column_num += yyleng; return T_RECORD     ; }
 [Pp][Rr][Oo][Cc][Ee][Dd][Uu][Rr][Ee]                      {lex_column_num += yyleng; return T_PROCEDURE  ; }
 [Ff][Uu][Nn][Cc][Tt][Ii][Oo][Nn]                          {lex_column_num += yyleng; return T_FUNCTION   ; }
 [Bb][Ee][Gg][Ii][Nn]                                      {lex_column_num += yyleng; return T_BEGIN      ; }
