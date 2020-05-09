@@ -348,8 +348,6 @@ void _ast_node_attr_dump_fp(ASTNodeAttr *head, FILE *fp) {
             case ATTR_KIND_STRING:
                 fprintf(fp, "\"%s\"", (char *) attr->value);
                 break;
-
-
             case ATTR_KIND_AST_NODE:
                 assert(attr->value != NULL);
                 _ast_node_dump_fp((ASTNode *) (attr->value), fp);
@@ -362,10 +360,11 @@ void _ast_node_attr_dump_fp(ASTNodeAttr *head, FILE *fp) {
 void _ast_node_dump_fp(ASTNode *head, FILE *fp) {
     assert(head != NULL);
     ASTNode *node = NULL;
-    fprintf(fp, "[");
+    //fprintf(fp, "[");
     DL_FOREACH(head, node) {
         if (node != head) fprintf(fp, ",");
         if(strstr(node->type, "LIST")){
+            fprintf(fp, "[");
             ASTNodeAttr *attr = NULL;
             DL_FOREACH(node->first_attr, attr){
                 if (attr != node->first_attr) fprintf(fp, ",");
@@ -382,6 +381,7 @@ void _ast_node_dump_fp(ASTNode *head, FILE *fp) {
                 free(attr_);
                 fprintf(fp, "}");
             }
+            fprintf(fp, "]");
         } else{
             fprintf(fp, "{\"type\":\"%s\",", node->type);
             if (node->pos != NULL){
@@ -400,7 +400,7 @@ void _ast_node_dump_fp(ASTNode *head, FILE *fp) {
 //                node->pos->col
 //        );
     }
-    fprintf(fp, "]");
+    //fprintf(fp, "]");
 }
 
 void ast_node_dump_json(ASTNode *head, char *filename) {
