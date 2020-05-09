@@ -1,8 +1,9 @@
 program sample;
-
-var x : integer;
+var
+    x : integer;
+    b : integer;
 
 begin
-    x := 1+2+5*8-5+(5*6);
-    writeInt(x)
+    if b=0 then gcd:=a
+    else gcd:=gcd(b, a mod b);
 end.

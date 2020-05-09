@@ -1,8 +1,7 @@
 program while_test;
 
 var x: boolean;
-var i: integer;
-
+    i: integer;
 begin
     i := 0;
 
