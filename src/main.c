@@ -34,6 +34,7 @@ int main(int argc, char *argv[])
         }
     }
     yyparse();
+    //sef
     //    printf("%s", root->first_attr->value);
     ast_node_dump_json(root, "step0.json");
     generate_c_code(root,stdout);
