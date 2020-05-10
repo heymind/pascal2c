@@ -208,6 +208,8 @@ void do_generate(ASTNode *node, FILE *out) {
         }
     } else if (strcmp(type, "ELSE_PART") == 0) {
         do_generate(ast_node_get_attr_node_value(node, "STATEMENT"), out);
+    } else if (strcmp(type, "RELOP_CEQ") == 0) {
+        fprintf(out, " == ");
     } else if (strcmp(type, "RELOP_CNE") == 0) {
         fprintf(out, " != ");
     } else if (strcmp(type, "ADDOP_PLUS") == 0) {
@@ -234,8 +236,7 @@ void do_generate(ASTNode *node, FILE *out) {
                     do_generate(ast_node_get_attr_node_value(cur, "TERM"), out);
                 }
                 if (cur != NULL && cur->next != NULL) {
-//                    do_generate(ast_node_get_attr_node_value(node,"RELOP"),out);
-                    fprintf(out, " == ");
+                    do_generate(ast_node_get_attr_node_value(node, "RELOP"), out);
                 }
             }
         } else {
