@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <utlist.h>
 
 int level = 0;
 #define BEGIN_BLOCK(o) {level++;fprintf((o),"{");}
@@ -24,6 +25,7 @@ void do_generate(ASTNode *node, FILE *out) {
         do_generate(ast_node_get_attr_node_value(node, "VAR_DECLARATIONS"), out);
         do_generate(ast_node_get_attr_node_value(node, "CONST_DECLARATIONS"), out);
         generate_subprogram_defs(ast_node_get_attr_node_value(node, "SUBPROGRAM_DECLARATIONS_LIST"), out);
+        do_generate(ast_node_get_attr_node_value(node, "SUBPROGRAM_DECLARATIONS_LIST"), out);
         do_generate(ast_node_get_attr_node_value(node, "PROGRAM_HEAD"), out);
         BEGIN_BLOCK(out);
         do_generate(ast_node_get_attr_node_value(node, "COMPOUND_STATEMENT"), out);
@@ -106,8 +108,11 @@ void do_generate(ASTNode *node, FILE *out) {
             fprintf(out, "[%d]", atoi(period_end) - atoi(period_begin) + 1);
         }
     } else if (strcmp(type, "SUBPROGRAM_DECLARATIONS_LIST") == 0) {
-//        do_generate(ast_node_get_attr_node_value(node,"SUBPROGRAM_DECLARATIONS"),out);
-        do_generate(ast_node_get_attr_node_value(node, "SUBPROGRAM"), out);
+        for (ASTNodeAttr *cur = node->first_attr; cur; (cur) = (cur)->next) {
+            do_generate((ASTNode *) cur->value, out);
+            fprintf(out, ";");
+        }
+
     } else if (strcmp(type, "SUBPROGRAM") == 0) {
         do_generate(ast_node_get_attr_node_value(node, "SUBPROGRAM_HEAD"), out);
         do_generate(ast_node_get_attr_node_value(node, "SUBPROGRAM_BODY"), out);
@@ -153,7 +158,7 @@ void do_generate(ASTNode *node, FILE *out) {
     } else if (strcmp(type, "STATEMENT") == 0) {
 //        printf("%s", node->first_attr->value);
         //这里必须保证TYPE节点是STATEMENT的第一个属性
-        if(strcmp(node->first_attr->value, "WHILE") == 0) {
+        if (strcmp(node->first_attr->value, "WHILE") == 0) {
             fprintf(out, "while(");
             BEGIN_BLOCK(out);
             do_generate(ast_node_get_attr_node_value(node, "EXPRESSION"), out);
@@ -200,12 +205,20 @@ void do_generate(ASTNode *node, FILE *out) {
         printf("TODO:TRANSLATE `ID_VARPART`\n");
     } else if (strcmp(type, "PROCEDURE_CALL") == 0) {
         char *func_name = ast_node_get_attr_str_value(node, "ID");
-        fprintf(out, func_name_change(func_name));
-        if (ast_node_get_attr_node_value(node, "EXPRESSION_LIST") != NULL) {
-            fprintf(out, "(");
-            do_generate(ast_node_get_attr_node_value(node, "EXPRESSION_LIST"), out);
-            fprintf(out, ");");
+        if (!strcmp(func_name, "read")) {
+            generate_read(node, out);
+            return;
+        } else if (!strcmp(func_name, "write")) {
+            generate_write(node, out);
+        } else {
+            fprintf(out, "%s(", func_name);
         }
+        if (ast_node_get_attr_node_value(node, "EXPRESSION_LIST") != NULL) {
+            do_generate(ast_node_get_attr_node_value(node, "EXPRESSION_LIST"), out);
+        }
+        fprintf(out, ");");
+
+
     } else if (strcmp(type, "ELSE_PART") == 0) {
         do_generate(ast_node_get_attr_node_value(node, "STATEMENT"), out);
     } else if (strcmp(type, "RELOP_CEQ") == 0) {
@@ -284,7 +297,8 @@ char *var_type_change(char *pascal_var_type) {
     char *c_var_type;
     if (!strcmp(pascal_var_type, "shortint")) {
         c_var_type = "short";
-    } else if (!strcmp(pascal_var_type, "integer") || !strcmp(pascal_var_type, "Integer")|| !strcmp(pascal_var_type, "boolean") ||!strcmp(pascal_var_type, "Boolean")) {
+    } else if (!strcmp(pascal_var_type, "integer") || !strcmp(pascal_var_type, "Integer") ||
+               !strcmp(pascal_var_type, "boolean") || !strcmp(pascal_var_type, "Boolean")) {
         c_var_type = "int";
     } else if (!strcmp(pascal_var_type, "longint")) {
         c_var_type = "long";
@@ -304,10 +318,51 @@ char *var_type_change(char *pascal_var_type) {
         c_var_type = "double";
     } else if (!strcmp(pascal_var_type, "char")) {
         c_var_type = "char";
-    } else{
+    } else {
         c_var_type = pascal_var_type;
     }
     return c_var_type;
+}
+
+void generate_read(ASTNode *node, FILE *out) {
+    fprintf(out, "scanf(\"");
+    for (ASTNodeAttr *cur = node->first_attr; cur; (cur) = (cur)->next) {
+        // 从符号表里获取类型信息，目前没有符号表，全部默认为 整数型
+        if (cur == node->first_attr) {
+            fprintf(out, "%%d");
+        } else {
+            fprintf(out, " %%d");
+        }
+    }
+    fprintf(out, "\",");
+    ASTNode *expr_list = ast_node_get_attr_node_value(node, "EXPRESSION_LIST");
+    if (expr_list) {
+        fprintf(out, "&");
+        for (ASTNodeAttr *cur = expr_list->first_attr; cur; (cur) = (cur)->next) {
+            do_generate(cur->value, out);
+            if (cur != NULL && cur->next != NULL) {
+                fprintf(out, ", &");
+            }
+        }
+    }
+
+    fprintf(out, ");");
+
+
+}
+
+void generate_write(ASTNode *node, FILE *out) {
+    fprintf(out, "printf(\"");
+    for (ASTNodeAttr *cur = node->first_attr; cur; (cur) = (cur)->next) {
+        // 从符号表里获取类型信息，目前没有符号表，全部默认为 整数型
+        if (cur == node->first_attr) {
+            fprintf(out, "%%d");
+        } else {
+            fprintf(out, " %%d");
+        }
+    }
+    fprintf(out, "\",");
+
 }
 
 char *func_name_change(char *pascal_func_name) {
@@ -328,12 +383,11 @@ void generate_c_code(ASTNode *root, FILE *out) {
 void generate_subprogram_defs(ASTNode *node, FILE *out) {
     if (node == NULL) return;
     char *type = node->type;
-    if (strcmp(type, "SUBPROGRAM_DECLARATIONS") == 0) {
-        generate_subprogram_defs(ast_node_get_attr_node_value(node, "SUBPROGRAM_DECLARATIONS"), out);
-        generate_subprogram_defs(ast_node_get_attr_node_value(node, "SUBPROGRAM"), out);
-    } else if (strcmp(type, "SUBPROGRAM") == 0) {
-        do_generate(ast_node_get_attr_node_value(node, "SUBPROGRAM_HEAD"), out);
-        fprintf(out, ";");
+    if (strcmp(type, "SUBPROGRAM_DECLARATIONS_LIST") == 0) {
+        for (ASTNodeAttr *cur = node->first_attr; cur; (cur) = (cur)->next) {
+            do_generate(ast_node_get_attr_node_value((ASTNode *) cur->value, "SUBPROGRAM_HEAD"), out);
+            fprintf(out, ";");
+        }
     } else {
         assert(0 && "unreachable");
     }
