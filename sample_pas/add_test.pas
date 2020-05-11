@@ -1,7 +1,7 @@
 Program Exam12;
-Var a: integer;
+Var
+    a,b: integer;
 Begin
-    a := a + 1;
-    write (a);
-    Readln
+    a := a + b;
+    write (a)
 End.
