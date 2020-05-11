@@ -2,6 +2,7 @@
 #include "utlist.h"
 #include "ast.h"
 #include "codegen.h"
+#include "sybtable.h"
 #include "error.h"
 extern FILE *yyin;
 int yyparse();
@@ -37,6 +38,7 @@ int main(int argc, char *argv[])
     //sef
     //    printf("%s", root->first_attr->value);
     ast_node_dump_json(root, "step0.json");
+    ge_syb_table(root,stdout);
     generate_c_code(root,stdout);
 
     //        ASTNode *program_node = _ast_node_create("PROGRAM");
