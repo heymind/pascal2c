@@ -353,9 +353,10 @@ void generate_read(ASTNode *node, FILE *out) {
 
 void generate_write(ASTNode *node, FILE *out) {
     fprintf(out, "printf(\"");
-    for (ASTNodeAttr *cur = node->first_attr; cur; (cur) = (cur)->next) {
+    ASTNodeAttr *first = ast_node_get_attr_node_value(node,"EXPRESSION_LIST")->first_attr;
+    for (ASTNodeAttr *cur = first; cur; (cur) = (cur)->next) {
         // 从符号表里获取类型信息，目前没有符号表，全部默认为 整数型
-        if (cur == node->first_attr) {
+        if (cur == first) {
             fprintf(out, "%%d");
         } else {
             fprintf(out, " %%d");
