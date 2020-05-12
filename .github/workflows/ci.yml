@@ -1,0 +1,21 @@
+name: C/C++ CI
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: install packages
+        run:  sudo apt-get update -m &&  sudo apt-get install cmake gcc bison flex python3
+        shell: bash
+      - name: build
+        run: mkdir build && cd build && cmake .. && make
+        shell: bash
+      - name: tests
+        run: python3 ./ci_test/run_tests.py build/pascal2c
