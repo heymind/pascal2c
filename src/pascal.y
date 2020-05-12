@@ -39,7 +39,7 @@ extern UT_array *new_types;
 %token   T_ARRAY T_RECORD
 
 //This tokens has special types because they are related to real information to use and they are not constants like IF or OR, they mean Regular Expressions
-%token <text> T_BASIC_TYPE
+%token <text> T_BASIC_TYPEADDOP_PLUS
 %token <text> T_ID
 %token <text> T_NUM
 %token <text> T_REAL

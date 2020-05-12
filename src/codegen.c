@@ -227,7 +227,10 @@ void do_generate(ASTNode *node, FILE *out) {
         fprintf(out, " != ");
     } else if (strcmp(type, "ADDOP_PLUS") == 0) {
         fprintf(out, " + ");
-    } else if (strcmp(type, "MULOP") == 0) {
+    } else if (strcmp(type, "ADDOP_MINUS") == 0) {
+        fprintf(out, " - ");
+    }
+    else if (strcmp(type, "MULOP") == 0) {
         printf("TODO:TRANSLATE `MULOP`\n");
     } else if (strcmp(type, "EXPRESSION_LIST") == 0) {
         ASTNode *expression_node;
