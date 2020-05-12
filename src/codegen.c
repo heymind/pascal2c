@@ -21,9 +21,9 @@ void do_generate(ASTNode *node, FILE *out) {
     char *type = node->type;
     if (strcmp(type, "PROGRAM_STRUCT") == 0) {
         fprintf(out, "#include <stdio.h>");
+        do_generate(ast_node_get_attr_node_value(node, "CONST_DECLARATIONS"), out);
         do_generate(ast_node_get_attr_node_value(node, "TYPE_DECLARATIONS"), out);
         do_generate(ast_node_get_attr_node_value(node, "VAR_DECLARATIONS"), out);
-        do_generate(ast_node_get_attr_node_value(node, "CONST_DECLARATIONS"), out);
         generate_subprogram_defs(ast_node_get_attr_node_value(node, "SUBPROGRAM_DECLARATIONS_LIST"), out);
         do_generate(ast_node_get_attr_node_value(node, "SUBPROGRAM_DECLARATIONS_LIST"), out);
         do_generate(ast_node_get_attr_node_value(node, "PROGRAM_HEAD"), out);
@@ -119,7 +119,10 @@ void do_generate(ASTNode *node, FILE *out) {
     } else if (strcmp(type, "SUBPROGRAM_HEAD") == 0) {
         NEWLINE(out);
         char *func_type = ast_node_get_attr_str_value(node, "BASIC_TYPE");
-        fprintf(out, "%s ", var_type_change(func_type));
+        if(func_type == NULL)
+            fprintf(out, "void ");
+        else
+            fprintf(out, "%s ", var_type_change(func_type));
         fprintf(out, "%s(", ast_node_get_attr_str_value(node, "ID"));
         do_generate(ast_node_get_attr_node_value(node, "FORMAL_PARAMETER"), out);
         fprintf(out, ")");
@@ -328,9 +331,11 @@ char *var_type_change(char *pascal_var_type) {
 
 void generate_read(ASTNode *node, FILE *out) {
     fprintf(out, "scanf(\"");
-    for (ASTNodeAttr *cur = node->first_attr; cur; (cur) = (cur)->next) {
+    ASTNode *lower_node = node->first_attr->next->value;
+    ASTNodeAttr *start = lower_node->first_attr;
+    for (ASTNodeAttr *cur = start; cur; (cur) = (cur)->next) {
         // 从符号表里获取类型信息，目前没有符号表，全部默认为 整数型
-        if (cur == node->first_attr) {
+        if (cur == start) {
             fprintf(out, "%%d");
         } else {
             fprintf(out, " %%d");

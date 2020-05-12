@@ -46,7 +46,7 @@ extern UT_array *new_types;
 
 
 //This are the keywords that we're gonna use accross the grammar
-%type <node> program_struct program_head program_body idlist const_declarations const_declaration const_value type_declarations type_declaration type_define var_declarations var_declaration var_assign var_records var_record var_record_assign type new_type subprogram_declarations subprogram subprogram_head formal_parameter parameter_list parameter var_parameter value_parameter subprogram_body compound_statement statement_list statement variable_list variable procedure_call else_part relop addop mulop expression_list expression simple_expression term factor period_list period
+%type <node> program_struct program_head program_body idlist const_declarations const_declaration const_declaration_ const_define const_value type_declarations type_declaration type_define var_declarations var_declaration var_assign var_records var_record var_record_assign type new_type subprogram_declarations subprogram subprogram_head formal_parameter parameter_list parameter var_parameter value_parameter subprogram_body compound_statement statement_list statement variable_list variable procedure_call else_part relop addop mulop expression_list expression simple_expression term factor period_list period
 %type <attr> idlist_ parameter_list_ statement_list_ variable_list_ expression_list_ period_list_ type_declaration_ var_declaration_ var_record_ subprogram_declarations_
 
 %%
@@ -107,36 +107,44 @@ idlist_:T_COMMA T_ID idlist_
         $$ = NULL;
     }
 
-const_declarations:T_CONST const_declaration T_SEMICOLON
+const_declarations:T_CONST const_declaration
     {
         ASTNode *node = ast_node_create_without_pos("CONST_DECLARATIONS");
 
-        ast_node_attr_node_append(node,"CONST_DECLARATION",$2);
+        ast_node_attr_node_append(node,"CONST_DECLARATION_LIST",$2);
 
         $$ = node;
     }
     |{
-        $$=NULL; 
+        $$=NULL;
     }
 
-const_declaration:const_declaration T_SEMICOLON T_ID T_CEQ const_value
+const_declaration:const_define const_declaration_
     {
-        ASTNode *node = ast_node_create_without_pos("CONST_DECLARATION");
-        ast_node_attr_node_append(node,"CONST_DECLARATION",$1);
-
-        ast_node_set_attr_str(node,"ID",$3);
-
-        ast_node_attr_node_append(node,"CONST_VALUE",$5);
+    	ASTNode *node = ast_node_create_without_pos("CONST_DECLARATION_LIST");
+        ASTNodeAttr *attr = ast_node_attr_create_node("CONST_DECLARATION",$1);
+        node->first_attr = attr;
+        ast_node_attr_append(node->first_attr,$2);
         $$ = node;
     }
-    |T_ID T_CEQ const_value
+
+const_declaration_:const_define const_declaration_
     {
-        ASTNode *node = ast_node_create_without_pos("CONST_DECLARATION");
+    	ASTNodeAttr *attr = ast_node_attr_create_node("CONST_DECLARATION",$1);
+        ast_node_attr_append(attr, $2);
+        $$ = attr;
+    }
+    |{$$ = NULL;}
+
+const_define:T_ID T_CEQ const_value T_SEMICOLON
+    {
+    	ASTNode *node = ast_node_create_without_pos("CONST_DECLARATION");
         ast_node_set_attr_str(node,"ID",$1);
 
         ast_node_attr_node_append(node,"CONST_VALUE",$3);
         $$ = node;
     }
+
 
 const_value:T_PLUS T_REAL
     {

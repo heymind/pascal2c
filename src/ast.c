@@ -301,7 +301,9 @@ char *ast_node_get_attr_str_value(ASTNode *node, const char *key) {
 //        target_attr = current_attr;
 //    }
     ASTNodeAttr *target_attr = ast_node_get_attr(node, key);
-    assert(target_attr != NULL && "ast node doesn't have attr named key");
+    //assert(target_attr != NULL && "ast node doesn't have attr named key");
+    if (target_attr == NULL)
+        return NULL;
     assert(target_attr->kind == ATTR_KIND_STRING && "attr node named key isn't string node");
 
     return (char *) target_attr->value;
