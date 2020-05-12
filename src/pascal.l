@@ -58,9 +58,9 @@ UT_array *new_types;
 ":"                   {lex_column_num += 1; return T_COLON    ; }
 "."                   {lex_column_num += 1; return T_DOT      ; }
 ","                   {lex_column_num += 1; return T_COMMA    ; }
-[0-9]+                {yylval.text = sdsnew(yytext); lex_column_num += yyleng; return T_NUM      ; }
+['][A-Za-z][']        {yylval.text = sdsnew(yytext);lex_column_num += 1; return T_LETTER   ; }
 [A-Za-z][A-Za-z0-9_]* {yylval.text = sdsnew(yytext); lex_column_num += yyleng; return T_ID       ; }
-[0-9]+|[0-9]+\.[0-9]+ {yylval.text = sdsnew(yytext); lex_column_num += yyleng; return T_REAL     ; }
+[0-9]+|[0-9]+\.[0-9]+ {yylval.text = sdsnew(yytext); lex_column_num += yyleng; return T_NUM     ; }
 " "|"\t"              {lex_column_num++;}
 "\n"|"\r"|[\r][\n]|[\n][\r]       {lex_column_num = 0; lex_row_num = yylineno;}
 .                           { fprintf (stderr, "Lexical Error: unexpected character '%c' at line: %d colum: %d \n", *yytext, yylineno, lex_column_num); }
