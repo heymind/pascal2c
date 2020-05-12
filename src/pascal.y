@@ -42,7 +42,7 @@ extern UT_array *new_types;
 %token <text> T_BASIC_TYPE
 %token <text> T_ID
 %token <text> T_NUM
-%token <text> T_REAL
+%token <text> T_LETTER
 
 
 //This are the keywords that we're gonna use accross the grammar
@@ -138,26 +138,33 @@ const_declaration:const_declaration T_SEMICOLON T_ID T_CEQ const_value
         $$ = node;
     }
 
-const_value:T_PLUS T_REAL
+const_value:T_PLUS T_NUM
     {
         ASTNodePos * pos = ast_node_pos_create(lex_row_num, lex_column_num-yyleng, lex_row_num, lex_column_num);
         ASTNode *node = ast_node_create("CONST_VALUE",pos);
-        ast_node_set_attr_str(node,"T_PLUS",$2);
+        ast_node_set_attr_str(node,"T_REAL",$2);
         $$ = node;
     }
-    |T_MINUS T_REAL
+    |T_MINUS T_NUM
     {
         ASTNodePos * pos = ast_node_pos_create(lex_row_num, lex_column_num-yyleng, lex_row_num, lex_column_num);
         ASTNode *node = ast_node_create("CONST_VALUE",pos);
         ast_node_set_attr_str(node,"T_MINUS",$2);
         $$ = node;
     }
-    |T_REAL
+    |T_NUM
     {
         ASTNodePos * pos = ast_node_pos_create(lex_row_num, lex_column_num-yyleng, lex_row_num, lex_column_num);
         ASTNode *node = ast_node_create("CONST_VALUE",pos);
         ast_node_set_attr_str(node,"T_REAL",$1);
         $$ = node;
+    }
+    | T_LETTER
+    {
+    	ASTNodePos * pos = ast_node_pos_create(lex_row_num, lex_column_num-yyleng, lex_row_num, lex_column_num);
+	ASTNode *node = ast_node_create("CONST_VALUE",pos);
+	ast_node_set_attr_str(node,"T_LETTER",$1);
+	$$ = node;
     }
 
 type_declarations:T_TYPE type_declaration
