@@ -229,7 +229,12 @@ void do_generate(ASTNode *node, FILE *out) {
         fprintf(out, " + ");
     } else if (strcmp(type, "ADDOP_MINUS") == 0) {
         fprintf(out, " - ");
-    } else if (strcmp(type, "MULOP") == 0) {
+    } else if (strcmp(type, "MULOP_MUL") == 0) {
+        fprintf(out, " * ");
+    } else if (strcmp(type, "MULOP_DIV") == 0) {
+        fprintf(out, " / ");
+    }
+    else if (strcmp(type, "MULOP") == 0) {
         printf("TODO:TRANSLATE `MULOP`\n");
     } else if (strcmp(type, "EXPRESSION_LIST") == 0) {
         ASTNode *expression_node;
@@ -271,7 +276,7 @@ void do_generate(ASTNode *node, FILE *out) {
     } else if (strcmp(type, "TERM") == 0) {
         if (ast_node_get_attr_node_value(node, "MULOP") != NULL) {
             do_generate(ast_node_get_attr_node_value(node, "TERM"), out);
-            fprintf(out, " %% ");
+             do_generate(ast_node_get_attr_node_value(node, "MULOP"), out);
             do_generate(ast_node_get_attr_node_value(node, "FACTOR"), out);
         } else {
             do_generate(ast_node_get_attr_node_value(node, "FACTOR"), out);
@@ -355,7 +360,7 @@ void generate_read(ASTNode *node, FILE *out) {
 
 void generate_write(ASTNode *node, FILE *out) {
     fprintf(out, "printf(\"");
-    ASTNodeAttr *first = ast_node_get_attr_node_value(node,"EXPRESSION_LIST")->first_attr;
+    ASTNodeAttr *first = ast_node_get_attr_node_value(node, "EXPRESSION_LIST")->first_attr;
     for (ASTNodeAttr *cur = first; cur; (cur) = (cur)->next) {
         // 从符号表里获取类型信息，目前没有符号表，全部默认为 整数型
         if (cur == first) {
