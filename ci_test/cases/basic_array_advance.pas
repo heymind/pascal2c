@@ -1,7 +1,6 @@
-program basic_array(input,output);
+program basic_array_advance(input,output);
 TYPE
   level = array[1..10, -2..3] of integer;
-  END;
 VAR
    test_array: level;
 begin
