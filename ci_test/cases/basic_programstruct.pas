@@ -2,6 +2,7 @@ program basic_program_struct(input,output);
 const
   Pi = 3.14;
   NUMBER_3 = 3;
+  LE = 'l';
 var
   r : Integer;
   a : Integer;
