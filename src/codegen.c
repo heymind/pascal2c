@@ -53,15 +53,15 @@ void do_generate(ASTNode *node, FILE *out) {
         NEWLINE(out);
         fprintf(out, "#define %s (",
                 ast_node_get_attr_str_value(node, "ID"));
-        do_generate(ast_node_get_attr_node_value(node, "CONST_VALUE"),out);
+        do_generate(ast_node_get_attr_node_value(node, "CONST_VALUE"), out);
         fprintf(out, ")\n");
     } else if (strcmp(type, "CONST_VALUE") == 0) {
         if (ast_node_get_attr(node, "T_NUM") != NULL) {
-           fprintf(out,"%s", ast_node_get_attr_str_value(node, "T_NUM"));
+            fprintf(out, "%s", ast_node_get_attr_str_value(node, "T_NUM"));
         } else if (ast_node_get_attr(node, "T_MINUS") != NULL) {
-            fprintf(out,"-%s", ast_node_get_attr_str_value(node, "T_MINUS"));
+            fprintf(out, "-%s", ast_node_get_attr_str_value(node, "T_MINUS"));
         } else if (ast_node_get_attr(node, "T_LETTER") != NULL) {
-            fprintf(out,"\"%s\"", ast_node_get_attr_str_value(node, "T_LETTER"));
+            fprintf(out, "\"%s\"", ast_node_get_attr_str_value(node, "T_LETTER"));
         }
     } else if (strcmp(type, "TYPE_DECLARATIONS") == 0) {
         do_generate(ast_node_get_attr_node_value(node, "TYPE_DECLARATION_LIST"), out);

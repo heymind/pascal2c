@@ -62,6 +62,7 @@ ASTNodePos *ast_node_pos_create(int start, int end, int col, int row);
  * @return ASTNode Object
  */
 ASTNode *ast_node_create(const char *type, ASTNodePos *pos);
+
 ASTNode *ast_node_create_without_pos(const char *type);
 
 /**
@@ -193,7 +194,7 @@ void _ast_node_attr_dump_fp(ASTNodeAttr *head, FILE *fp);
 
 void _ast_node_dump_fp(ASTNode *head, FILE *fp);
 
-UT_array* append_array_type(UT_array *types, char *string);
+UT_array *append_array_type(UT_array *types, char *string);
 
 int find_array_type(UT_array *types, char *string);
 

@@ -1,7 +1,6 @@
 #include "error.h"
 
-void print_error(char *errstr)
-{
+void print_error(char *errstr) {
     char unexpected_type[TYPELEN];
     char expecting_types[TYPENUM][TYPELEN];
     error_string_devider(unexpected_type, expecting_types, errstr);
@@ -11,22 +10,19 @@ void print_error(char *errstr)
 
     printf("(Ln %d, Col %d): ", lex_row_num, lex_column_num);
     char *tmp = strstr(errstr, "expecting ");
-    if (tmp == NULL)
-    {
+    if (tmp == NULL) {
         printf("String \"arrstr\" has fetal error.\n");
     }
     printf("%s\n", tmp);
 }
 
-int error_string_devider(char unexpected_type[TYPELEN], char expecting_types[TYPENUM][TYPELEN], char *errstr)
-{
+int error_string_devider(char unexpected_type[TYPELEN], char expecting_types[TYPENUM][TYPELEN], char *errstr) {
     char *tmp_start;
     char *tmp_end;
     char tmp[200];
 
     tmp_start = strstr(errstr, "unexpected ");
-    if (tmp_start == NULL)
-    {
+    if (tmp_start == NULL) {
         printf("String \"arrstr\" has fetal error.\n");
         return 0;
     }
