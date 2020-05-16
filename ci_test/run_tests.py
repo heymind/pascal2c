@@ -16,11 +16,15 @@ def run_test(case_name):
     c_file = os.path.join(TMPDIR, "{}.c".format(case_name))
     exe_file = os.path.join(TMPDIR, case_name)
     c_fp = open(c_file, "w")
-    errno = subprocess.run([PASCAL2C, pas_file], stdout=c_fp).returncode
+    p = subprocess.run([PASCAL2C, pas_file], stdout=subprocess.PIPE)
+    errno = p.returncode
     print("\t 1.translate using `pascal2c` in={} out={} errno={}".format(pas_file, c_file, errno))
+    code = p.stdout.decode('utf-8').strip()
+    c_fp.write(code)
     c_fp.close()
     if errno != 0:
         print("💔")
+        print(code)
         return False
 
     errno = subprocess.run(["gcc", c_file, "-o", exe_file], stdout=sys.stdout, stderr=sys.stderr).returncode
@@ -28,6 +32,7 @@ def run_test(case_name):
 
     if errno != 0:
         print("💔")
+        print(code)
         return False
 
     in_fp = open(in_file, "r")
@@ -37,6 +42,7 @@ def run_test(case_name):
     print("\t 2.run exe={} in={} errno={}".format(exe_file, in_file, p.returncode))
     if errno != 0:
         print("💔")
+        print(code)
         return False
 
     out_fp = open(out_file, "r")
