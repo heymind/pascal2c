@@ -118,8 +118,13 @@ void do_generate(ASTNode *node, FILE *out) {
         do_generate(ast_node_get_attr_node_value(node, "SUBPROGRAM_BODY"), out);
     } else if (strcmp(type, "SUBPROGRAM_HEAD") == 0) {
         NEWLINE(out);
-        char *func_type = ast_node_get_attr_str_value(node, "BASIC_TYPE");
-        fprintf(out, "%s ", var_type_change(func_type));
+        if (ast_node_get_attr(node,"BASIC_TYPE") != NULL) {
+            char *func_type = ast_node_get_attr_str_value(node, "BASIC_TYPE");
+            fprintf(out, "%s ", var_type_change(func_type));
+        } else {
+            fprintf(out, "void ");
+        }
+
         fprintf(out, "%s(", ast_node_get_attr_str_value(node, "ID"));
         do_generate(ast_node_get_attr_node_value(node, "FORMAL_PARAMETER"), out);
         fprintf(out, ")");
@@ -131,10 +136,16 @@ void do_generate(ASTNode *node, FILE *out) {
             do_generate(expression_node, out);
         }
     } else if (strcmp(type, "PARAMETER") == 0) {
-        do_generate(ast_node_get_attr_node_value(node, "VAL_PARAMETER"), out);
+        do_generate(ast_node_get_attr_node_value(node, "VAR_PARAMETER"), out);
         do_generate(ast_node_get_attr_node_value(node, "VALUE_PARAMETER"), out);
     } else if (strcmp(type, "VAR_PARAMETER") == 0) {
-        printf("TODO:TRANSLATE `VAR_PARAMETER`\n");
+        node = ast_node_get_attr_node_value(node,"VALUE_PARAMETER");
+        char *var_type = ast_node_get_attr_str_value(node, "BASIC_TYPE");
+        var_type = var_type_change(var_type);
+        for (ASTNodeAttr *cur = (ast_node_get_attr_node_value(node, "IDLIST")->first_attr); cur; (cur) = (cur)->next) {
+            fprintf(out, "%s *%s", var_type, cur->value);
+            if (cur != NULL && cur->next != NULL) fprintf(out, ", ");
+        }
     } else if (strcmp(type, "VALUE_PARAMETER") == 0) {
         char *var_type = ast_node_get_attr_str_value(node, "BASIC_TYPE");
         var_type = var_type_change(var_type);
