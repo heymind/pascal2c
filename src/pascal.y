@@ -150,7 +150,7 @@ const_value:T_PLUS T_NUM
     {
         ASTNodePos * pos = ast_node_pos_create(lex_row_num, lex_column_num-yyleng, lex_row_num, lex_column_num);
         ASTNode *node = ast_node_create("CONST_VALUE",pos);
-        ast_node_set_attr_str(node,"T_REAL",$2);
+        ast_node_set_attr_str(node,"T_NUM",$2);
         $$ = node;
     }
     |T_MINUS T_NUM
@@ -164,7 +164,7 @@ const_value:T_PLUS T_NUM
     {
         ASTNodePos * pos = ast_node_pos_create(lex_row_num, lex_column_num-yyleng, lex_row_num, lex_column_num);
         ASTNode *node = ast_node_create("CONST_VALUE",pos);
-        ast_node_set_attr_str(node,"T_REAL",$1);
+        ast_node_set_attr_str(node,"T_NUM",$1);
         $$ = node;
     }
     | T_LETTER
