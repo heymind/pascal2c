@@ -227,7 +227,13 @@ void do_generate(ASTNode *node, FILE *out) {
         fprintf(out, "%s", ast_node_get_attr_str_value(node, "ID"));
         do_generate(ast_node_get_attr_node_value(node, "ID_VARPART"), out);
     } else if (strcmp(type, "ID_VARPART") == 0) {
-        printf("TODO:TRANSLATE `ID_VARPART`\n");
+        ASTNode *list_node = node->first_attr->value;
+        ASTNodeAttr *start = list_node->first_attr;
+        for (ASTNodeAttr *cur = start; cur; (cur) = (cur)->next) {
+            fprintf(out, "[");
+            do_generate(cur->value, out);
+            fprintf(out, "]");
+        }
     } else if (strcmp(type, "PROCEDURE_CALL") == 0) {
         char *func_name = ast_node_get_attr_str_value(node, "ID");
         if (!strcmp(func_name, "read")) {
@@ -250,14 +256,28 @@ void do_generate(ASTNode *node, FILE *out) {
         fprintf(out, " == ");
     } else if (strcmp(type, "RELOP_CNE") == 0) {
         fprintf(out, " != ");
+    } else if (strcmp(type, "RELOP_CGE") == 0) {
+        fprintf(out, " >= ");
+    } else if (strcmp(type, "RELOP_CLE") == 0) {
+        fprintf(out, " <= ");
+    } else if (strcmp(type, "RELOP_CGT") == 0) {
+        fprintf(out, " > ");
+    } else if (strcmp(type, "RELOP_CLT") == 0) {
+        fprintf(out, " < ");
     } else if (strcmp(type, "ADDOP_PLUS") == 0) {
         fprintf(out, " + ");
     } else if (strcmp(type, "ADDOP_MINUS") == 0) {
         fprintf(out, " - ");
+    } else if (strcmp(type, "ADDOP_OR") == 0) {
+        fprintf(out, " || ");
     } else if (strcmp(type, "MULOP_MUL") == 0) {
         fprintf(out, " * ");
     } else if (strcmp(type, "MULOP_DIV") == 0) {
         fprintf(out, " / ");
+    } else if (strcmp(type, "MULOP_AND") == 0) {
+        fprintf(out, " && ");
+    } else if (strcmp(type, "MULOP_MOD") == 0) {
+        fprintf(out, " %% ");
     } else if (strcmp(type, "MULOP") == 0) {
         printf("TODO:TRANSLATE `MULOP`\n");
     } else if (strcmp(type, "EXPRESSION_LIST") == 0) {
@@ -271,32 +291,54 @@ void do_generate(ASTNode *node, FILE *out) {
         }
     } else if (strcmp(type, "EXPRESSION") == 0) {
         if (ast_node_get_attr_node_value(node, "RELOP") != NULL) {
-            for (ASTNode *cur = ast_node_get_attr_node_value(node, "SIMPLE_EXPRESSION"); cur; (cur) = (cur)->next) {
-                if (ast_node_get_attr_node_value(cur, "ADDOP") != NULL) {
-                    do_generate(ast_node_get_attr_node_value(cur, "SIMPLE_EXPRESSION"), out);
-                    do_generate(ast_node_get_attr_node_value(cur, "ADDOP"), out);
-                    do_generate(ast_node_get_attr_node_value(cur, "TERM"), out);
-                } else {
-                    do_generate(ast_node_get_attr_node_value(cur, "TERM"), out);
-                }
-                if (cur != NULL && cur->next != NULL) {
-                    do_generate(ast_node_get_attr_node_value(node, "RELOP"), out);
+//            for (ASTNode *cur = ast_node_get_attr_node_value(node, "SIMPLE_EXPRESSION_HEAD"); cur; (cur) = (cur)->next) {
+//                fprintf(out, "%s", cur->first_attr->key);
+//                if (ast_node_get_attr_node_value(cur, "ADDOP") != NULL) {
+//                    do_generate(ast_node_get_attr_node_value(cur, "SIMPLE_EXPRESSION"), out);
+//                    do_generate(ast_node_get_attr_node_value(cur, "ADDOP"), out);
+//                    do_generate(ast_node_get_attr_node_value(cur, "TERM"), out);
+//                } else {
+//                    do_generate(ast_node_get_attr_node_value(cur, "TERM"), out);
+//                }
+//                if (cur != NULL && cur->next != NULL) {
+//                    do_generate(ast_node_get_attr_node_value(node, "RELOP"), out);
+//                }
+//            }
+            for(ASTNodeAttr *cur = node->first_attr; cur; (cur) = (cur)->next){
+                if(strcmp(cur->key, "SIMPLE_EXPRESSION_HEAD") == 0){
+                    do_generate(cur->value, out);
+                } else if(strcmp(cur->key, "RELOP") == 0){
+                    do_generate(cur->value, out);
+                } else if(strcmp(cur->key, "SIMPLE_EXPRESSION_TAIL") == 0){
+                    do_generate(cur->value, out);
                 }
             }
         } else {
             do_generate(ast_node_get_attr_node_value(node, "SIMPLE_EXPRESSION"), out);
         }
     } else if (strcmp(type, "SIMPLE_EXPRESSION") == 0) {
-        for (ASTNode *cur = node; cur; (cur) = (cur)->next) {
-            if (ast_node_get_attr_node_value(cur, "ADDOP") != NULL) {
-                do_generate(ast_node_get_attr_node_value(cur, "SIMPLE_EXPRESSION"), out);
-                do_generate(ast_node_get_attr_node_value(cur, "ADDOP"), out);
-                do_generate(ast_node_get_attr_node_value(cur, "TERM"), out);
-            } else {
-                do_generate(ast_node_get_attr_node_value(cur, "TERM"), out);
+//        for (ASTNode *cur = node; cur; (cur) = (cur)->next) {
+//            if (ast_node_get_attr_node_value(cur, "ADDOP") != NULL) {
+//                do_generate(ast_node_get_attr_node_value(cur, "SIMPLE_EXPRESSION"), out);
+//                do_generate(ast_node_get_attr_node_value(cur, "ADDOP"), out);
+//                do_generate(ast_node_get_attr_node_value(cur, "TERM"), out);
+//            } else {
+//                do_generate(ast_node_get_attr_node_value(cur, "TERM"), out);
+//            }
+//        }
+        if(ast_node_get_attr_node_value(node, "ADDOP") != NULL){
+            for(ASTNodeAttr *cur = node->first_attr; cur; (cur) = (cur)->next){
+                if(strcmp(cur->key, "SIMPLE_EXPRESSION") == 0){
+                    do_generate(cur->value, out);
+                } else if(strcmp(cur->key, "ADDOP") == 0){
+                    do_generate(cur->value, out);
+                } else if(strcmp(cur->key, "TERM") == 0){
+                    do_generate(cur->value, out);
+                }
             }
+        } else {
+            do_generate(ast_node_get_attr_node_value(node, "TERM"), out);
         }
-//        printf("TODO:TRANSLATE `SIMPLE_EXPRESSION`\n");
     } else if (strcmp(type, "TERM") == 0) {
         if (ast_node_get_attr_node_value(node, "MULOP") != NULL) {
             do_generate(ast_node_get_attr_node_value(node, "TERM"), out);
@@ -315,8 +357,21 @@ void do_generate(ASTNode *node, FILE *out) {
                 do_generate(ast_node_get_attr_node_value(node, "EXPRESSION_LIST"), out);
                 fprintf(out, ")");
             }
-        } else if (strcmp(node->first_attr->key, "VARIABLE") == 0) {
+        } else if (strcmp(node->first_attr->key, "VARIABLE") == 0){
             do_generate(ast_node_get_attr_node_value(node, "VARIABLE"), out);
+        } else if (strcmp(node->first_attr->key, "EXPRESSION") == 0){
+            fprintf(out, "(");
+            do_generate(ast_node_get_attr_node_value(node, "EXPRESSION"), out);
+            fprintf(out, ")");
+        } else if (strcmp(node->first_attr->key, "TYPE") == 0){
+            char* value = node->first_attr->value;
+            if(strcmp(value, "T_NOT") == 0){
+                fprintf(out, "!");
+                do_generate(ast_node_get_attr_node_value(node, "FACTOR"), out);
+            } else if(strcmp(value, "T_MINUS") == 0) {
+                fprintf(out, "-");
+                do_generate(ast_node_get_attr_node_value(node, "FACTOR"), out);
+            }
         }
     } else {
         printf("UNKNOWN TYPE:%s\n", type);
