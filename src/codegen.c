@@ -21,9 +21,9 @@ void do_generate(ASTNode *node, FILE *out) {
     char *type = node->type;
     if (strcmp(type, "PROGRAM_STRUCT") == 0) {
         fprintf(out, "#include <stdio.h>");
+        do_generate(ast_node_get_attr_node_value(node, "CONST_DECLARATIONS"), out);
         do_generate(ast_node_get_attr_node_value(node, "TYPE_DECLARATIONS"), out);
         do_generate(ast_node_get_attr_node_value(node, "VAR_DECLARATIONS"), out);
-        do_generate(ast_node_get_attr_node_value(node, "CONST_DECLARATIONS"), out);
         generate_subprogram_defs(ast_node_get_attr_node_value(node, "SUBPROGRAM_DECLARATIONS_LIST"), out);
         do_generate(ast_node_get_attr_node_value(node, "SUBPROGRAM_DECLARATIONS_LIST"), out);
         do_generate(ast_node_get_attr_node_value(node, "PROGRAM_HEAD"), out);
@@ -44,11 +44,25 @@ void do_generate(ASTNode *node, FILE *out) {
             if (cur != NULL && cur->next != NULL) fprintf(out, ", ");
         }
     } else if (strcmp(type, "CONST_DECLARATIONS") == 0) {
-        printf("TODO:TRANSLATE `CONST_DECLARATIONS`\n");
+        do_generate(ast_node_get_attr_node_value(node, "CONST_DECLARATION_LIST"), out);
+    } else if (strcmp(type, "CONST_DECLARATION_LIST") == 0) {
+        for (ASTNodeAttr *cur = (node->first_attr); cur; (cur) = (cur)->next) {
+            do_generate(cur->value, out);
+        }
     } else if (strcmp(type, "CONST_DECLARATION") == 0) {
-        printf("TODO:TRANSLATE `CONST_DECLARATION`\n");
+        NEWLINE(out);
+        fprintf(out, "#define %s (",
+                ast_node_get_attr_str_value(node, "ID"));
+        do_generate(ast_node_get_attr_node_value(node, "CONST_VALUE"),out);
+        fprintf(out, ")\n");
     } else if (strcmp(type, "CONST_VALUE") == 0) {
-        printf("TODO:TRANSLATE `CONST_VALUE`\n");
+        if (ast_node_get_attr(node, "T_NUM") != NULL) {
+           fprintf(out,"%s", ast_node_get_attr_str_value(node, "T_NUM"));
+        } else if (ast_node_get_attr(node, "T_MINUS") != NULL) {
+            fprintf(out,"-%s", ast_node_get_attr_str_value(node, "T_MINUS"));
+        } else if (ast_node_get_attr(node, "T_LETTER") != NULL) {
+            fprintf(out,"\"%s\"", ast_node_get_attr_str_value(node, "T_LETTER"));
+        }
     } else if (strcmp(type, "TYPE_DECLARATIONS") == 0) {
         do_generate(ast_node_get_attr_node_value(node, "TYPE_DECLARATION_LIST"), out);
     } else if (strcmp(type, "TYPE_DECLARATION_LIST") == 0) {
@@ -118,7 +132,7 @@ void do_generate(ASTNode *node, FILE *out) {
         do_generate(ast_node_get_attr_node_value(node, "SUBPROGRAM_BODY"), out);
     } else if (strcmp(type, "SUBPROGRAM_HEAD") == 0) {
         NEWLINE(out);
-        if (ast_node_get_attr(node,"BASIC_TYPE") != NULL) {
+        if (ast_node_get_attr(node, "BASIC_TYPE") != NULL) {
             char *func_type = ast_node_get_attr_str_value(node, "BASIC_TYPE");
             fprintf(out, "%s ", var_type_change(func_type));
         } else {
@@ -139,7 +153,7 @@ void do_generate(ASTNode *node, FILE *out) {
         do_generate(ast_node_get_attr_node_value(node, "VAR_PARAMETER"), out);
         do_generate(ast_node_get_attr_node_value(node, "VALUE_PARAMETER"), out);
     } else if (strcmp(type, "VAR_PARAMETER") == 0) {
-        node = ast_node_get_attr_node_value(node,"VALUE_PARAMETER");
+        node = ast_node_get_attr_node_value(node, "VALUE_PARAMETER");
         char *var_type = ast_node_get_attr_str_value(node, "BASIC_TYPE");
         var_type = var_type_change(var_type);
         for (ASTNodeAttr *cur = (ast_node_get_attr_node_value(node, "IDLIST")->first_attr); cur; (cur) = (cur)->next) {
@@ -244,8 +258,7 @@ void do_generate(ASTNode *node, FILE *out) {
         fprintf(out, " * ");
     } else if (strcmp(type, "MULOP_DIV") == 0) {
         fprintf(out, " / ");
-    }
-    else if (strcmp(type, "MULOP") == 0) {
+    } else if (strcmp(type, "MULOP") == 0) {
         printf("TODO:TRANSLATE `MULOP`\n");
     } else if (strcmp(type, "EXPRESSION_LIST") == 0) {
         ASTNode *expression_node;
@@ -287,7 +300,7 @@ void do_generate(ASTNode *node, FILE *out) {
     } else if (strcmp(type, "TERM") == 0) {
         if (ast_node_get_attr_node_value(node, "MULOP") != NULL) {
             do_generate(ast_node_get_attr_node_value(node, "TERM"), out);
-             do_generate(ast_node_get_attr_node_value(node, "MULOP"), out);
+            do_generate(ast_node_get_attr_node_value(node, "MULOP"), out);
             do_generate(ast_node_get_attr_node_value(node, "FACTOR"), out);
         } else {
             do_generate(ast_node_get_attr_node_value(node, "FACTOR"), out);
@@ -344,9 +357,11 @@ char *var_type_change(char *pascal_var_type) {
 
 void generate_read(ASTNode *node, FILE *out) {
     fprintf(out, "scanf(\"");
-    for (ASTNodeAttr *cur = node->first_attr; cur; (cur) = (cur)->next) {
+    ASTNode *lower_node = node->first_attr->next->value;
+    ASTNodeAttr *start = lower_node->first_attr;
+    for (ASTNodeAttr *cur = start; cur; (cur) = (cur)->next) {
         // 从符号表里获取类型信息，目前没有符号表，全部默认为 整数型
-        if (cur == node->first_attr) {
+        if (cur == start) {
             fprintf(out, "%%d");
         } else {
             fprintf(out, " %%d");
