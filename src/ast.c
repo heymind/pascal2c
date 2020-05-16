@@ -198,25 +198,24 @@ void ast_node_attr_append(ASTNodeAttr *attr, ASTNodeAttr *sub_attr) {
     attr->next = sub_attr;
 }
 
-void ast_node_create_attr_list_append(ASTNode* list_main_node, const char *key, ASTNode* list_node){
+void ast_node_create_attr_list_append(ASTNode *list_main_node, const char *key, ASTNode *list_node) {
 
 }
 
-UT_array* append_array_type(UT_array *types, char *string){
-    if(types == NULL){
+UT_array *append_array_type(UT_array *types, char *string) {
+    if (types == NULL) {
         utarray_new(types, &ut_str_icd);
         utarray_push_back(types, &string);
-    }
-    else{
+    } else {
         utarray_push_back(types, &string);
     }
     return types;
 }
 
-int find_array_type(UT_array *types, char *string){
+int find_array_type(UT_array *types, char *string) {
     char **p = NULL;
-    while ( (p=(char**)utarray_next(types, p))) {
-        if(strcmp(*p, string) == 0)
+    while ((p = (char **) utarray_next(types, p))) {
+        if (strcmp(*p, string) == 0)
             return 1;
     }
     return 0;
@@ -324,7 +323,7 @@ ASTNode *ast_node_get_attr_node_value(ASTNode *node, const char *key) {
 //        target_attr = current_attr;
 //    }
     ASTNodeAttr *target_attr = ast_node_get_attr(node, key);
-    if(target_attr == NULL)
+    if (target_attr == NULL)
         return NULL;
     assert(target_attr->kind == ATTR_KIND_AST_NODE && "attr node named key isn't ast node");
 
@@ -365,13 +364,13 @@ void _ast_node_dump_fp(ASTNode *head, FILE *fp) {
     //fprintf(fp, "[");
     DL_FOREACH(head, node) {
         if (node != head) fprintf(fp, ",");
-        if(strstr(node->type, "LIST")){
+        if (strstr(node->type, "LIST")) {
             fprintf(fp, "[");
             ASTNodeAttr *attr = NULL;
-            DL_FOREACH(node->first_attr, attr){
+            DL_FOREACH(node->first_attr, attr) {
                 if (attr != node->first_attr) fprintf(fp, ",");
                 fprintf(fp, "{\"type\":\"%s\",", node->type);
-                if (node->pos != NULL){
+                if (node->pos != NULL) {
                     fprintf(fp, "\"pos\":\"(%d,%d)->(%d,%d)\",", node->pos->start_row, node->pos->start_column,
                             node->pos->end_row, node->pos->end_column);
                 }
@@ -384,9 +383,9 @@ void _ast_node_dump_fp(ASTNode *head, FILE *fp) {
                 fprintf(fp, "}");
             }
             fprintf(fp, "]");
-        } else{
+        } else {
             fprintf(fp, "{\"type\":\"%s\",", node->type);
-            if (node->pos != NULL){
+            if (node->pos != NULL) {
                 fprintf(fp, "\"pos\":\"(%d,%d)->(%d,%d)\",", node->pos->start_row, node->pos->start_column,
                         node->pos->end_row, node->pos->end_column);
             }
