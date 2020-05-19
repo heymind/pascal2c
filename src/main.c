@@ -19,9 +19,15 @@ int main(int argc, char *argv[]) {
     yyin = stdin;
     root = ast_node_create_without_pos("PROGRAM");
     if (argc > 1) {
-        if ((yyin = fopen(argv[1], "r")) == NULL) {
-            printf("Can't open file %s\n", argv[1]);
-            return -1;
+        if (((yyin = fopen(argv[1], "r")) == NULL)) {
+            char path[200];
+            strcpy(path, "../sample_pas/");
+            strcat(path, argv[1]);
+            strcat(path, ".pas");
+            if ((yyin = fopen(path, "r")) == NULL){
+                printf("Can't open file %s\n", argv[1]);
+                return -1;
+            }
         }
     } else {
         if ((yyin = fopen("../sample_pas/gcd.pas", "r")) == NULL) {
