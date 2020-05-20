@@ -315,7 +315,7 @@ ASTNode *ast_node_get_attr_node_value(ASTNode *node, const char *key) {
 //    current_attr = node->first_attr;
 //
 //    if(current_attr == NULL){
-//        target_attr = NULL;
+//        target_att`r = NULL;
 //    } else {
 //        while(current_attr != NULL && strcmp(current_attr->key, key)){
 //            current_attr = current_attr->next;
