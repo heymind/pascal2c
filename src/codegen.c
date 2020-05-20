@@ -127,9 +127,35 @@ void do_generate(ASTNode *node, FILE *out) {
             fprintf(out, ";");
         }
 
-    } else if (strcmp(type, "SUBPROGRAM") == 0) {
+    } else if (strcmp(type, "SUBPROGRAM") == 0 &&
+               ast_node_get_attr_node_value(node, "SUBPROGRAM_HEAD") != NULL &&
+               ast_node_get_attr_node_value(node, "SUBPROGRAM_BODY") != NULL
+            ) {
+        char *func_type;
+        char *para_name;
+        ASTNode *cur = ast_node_get_attr_node_value(node, "SUBPROGRAM_HEAD");
+        if (ast_node_get_attr(cur, "ID") != NULL) {
+            para_name = var_type_change(ast_node_get_attr_str_value(cur, "ID"));
+        }
+        if (ast_node_get_attr(cur, "BASIC_TYPE") != NULL) {
+            func_type = var_type_change(ast_node_get_attr_str_value(cur, "BASIC_TYPE"));
+        } else {
+            func_type = "void";
+        }
+
         do_generate(ast_node_get_attr_node_value(node, "SUBPROGRAM_HEAD"), out);
-        do_generate(ast_node_get_attr_node_value(node, "SUBPROGRAM_BODY"), out);
+        BEGIN_BLOCK(out);
+        if (strcmp(func_type,"void")!=0){
+            NEWLINE(out);
+            fprintf(out, "%s %s;", func_type, para_name);
+            do_generate(ast_node_get_attr_node_value(node, "SUBPROGRAM_BODY"), out);
+            NEWLINE(out);
+            fprintf(out, "return %s;", para_name);
+        }
+        else{
+            do_generate(ast_node_get_attr_node_value(node, "SUBPROGRAM_BODY"), out);
+        }
+        END_BLOCK(out);
     } else if (strcmp(type, "SUBPROGRAM_HEAD") == 0) {
         NEWLINE(out);
         if (ast_node_get_attr(node, "BASIC_TYPE") != NULL) {
@@ -138,7 +164,6 @@ void do_generate(ASTNode *node, FILE *out) {
         } else {
             fprintf(out, "void ");
         }
-
         fprintf(out, "%s(", ast_node_get_attr_str_value(node, "ID"));
         do_generate(ast_node_get_attr_node_value(node, "FORMAL_PARAMETER"), out);
         fprintf(out, ")");
@@ -168,11 +193,9 @@ void do_generate(ASTNode *node, FILE *out) {
             if (cur != NULL && cur->next != NULL) fprintf(out, ", ");
         }
     } else if (strcmp(type, "SUBPROGRAM_BODY") == 0) {
-        BEGIN_BLOCK(out);
         do_generate(ast_node_get_attr_node_value(node, "CONST_DECLARATIONS"), out);
         do_generate(ast_node_get_attr_node_value(node, "VAR_DECLARATIONS"), out);
         do_generate(ast_node_get_attr_node_value(node, "COMPOUND_STATEMENT"), out);
-        END_BLOCK(out);
     } else if (strcmp(type, "COMPOUND_STATEMENT") == 0) {
         do_generate(ast_node_get_attr_node_value(node, "STATEMENT_LIST"), out);
     } else if (strcmp(type, "STATEMENT_LIST") == 0) {
@@ -224,13 +247,13 @@ void do_generate(ASTNode *node, FILE *out) {
                    ast_node_get_attr_node_value(node, "STATEMENT") != NULL
                 ) {
             char para[50];
-            strcpy(para,node->first_attr->next->value);
+            strcpy(para, node->first_attr->next->value);
             NEWLINE(out);
-            fprintf(out, "for(%s=",para);
+            fprintf(out, "for(%s=", para);
             do_generate(ast_node_get_attr_node_value(node, "EXPRESSION_BEGIN"), out);
-            fprintf(out, ";%s<=",para);
+            fprintf(out, ";%s<=", para);
             do_generate(ast_node_get_attr_node_value(node, "EXPRESSION_END"), out);
-            fprintf(out, ";%s++)",para);
+            fprintf(out, ";%s++)", para);
             BEGIN_BLOCK(out);
             do_generate(ast_node_get_attr_node_value(node, "STATEMENT"), out);
             END_BLOCK(out);
