@@ -479,8 +479,8 @@ statement:variable T_ASSIGNOP expression
     |T_FOR T_ID T_ASSIGNOP expression T_TO expression T_DO statement
     {
         ASTNode *node = ast_node_create_without_pos("STATEMENT");
-        ast_node_set_attr_str(node,"ID",$2);
         ast_node_set_attr_str(node,"TYPE", "FOR");
+        ast_node_set_attr_str(node,"ID",$2);
         ast_node_attr_node_append(node,"EXPRESSION_BEGIN",$4);
 
         ast_node_attr_node_append(node,"EXPRESSION_END",$6);
