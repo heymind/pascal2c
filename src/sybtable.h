@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include "ast.h"
 
-enum table_type {
+enum symbol_type {
     T_integer = 1,
     T_real,
     T_boolean,
@@ -20,14 +20,15 @@ enum table_type {
 
 struct symbol{
     const char *name;
-    enum table_type Ttype;
+    enum symbol_type type;
     int dimension;
+    const char *scope;
     struct symbol *next;
 };
 
 void do_ge_table(ASTNode *node, FILE *out);
-void addSymbol(char *name,enum table_type Ttype,int dimension,struct symbol *table);
-void getSymbol(char *name, struct symbol *table);
+void add_symbol(char *name,enum symbol_type type,int dimension,char *scope,struct symbol *table);
+struct symbol* get_symbol(char *name, char *scope,struct symbol *table);
 void ge_syb_table(ASTNode *root, FILE *out);
 
 #endif //PASCAL2C_SYBTABLE_H
