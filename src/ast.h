@@ -8,8 +8,13 @@
 
 #include "sds.h"
 #include "utarray.h"
-#include <stdio.h>
 #include "string.h"
+#include "error.h"
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <utlist.h>
 
 enum ast_node_attr_kind {
     ATTR_KIND_CONST_STRING = 1,

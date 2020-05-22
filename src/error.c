@@ -1,5 +1,25 @@
 #include "error.h"
 
+void error_pos_print() {
+    char pos_str[200] = "";
+    int column = lex_column_num;
+    int row = lex_row_num;
+    char str[50];
+    strcat(pos_str, "(Line ");
+    sprintf(str, "%d", row);
+    strcat(pos_str, str);
+    strcat(pos_str, ", Column ");
+    sprintf(str, "%d", column);
+    strcat(pos_str, str);
+    strcat(pos_str, ") ");
+    printf("%s",pos_str);
+}
+
+void error_with_pos(char * error_str) {
+    error_pos_print();
+    printf("%s\n",error_str);
+}
+
 void print_error(char *errstr) {
     char unexpected_type[TYPELEN];
     char expecting_types[TYPENUM][TYPELEN];
