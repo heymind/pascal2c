@@ -44,7 +44,7 @@ void do_ge_table(ASTNode *node){
 //        printf("IDLIST\n");
         for (ASTNodeAttr *cur = (node->first_attr); cur; (cur) = (cur)->next) {
 //            printf("%s", cur->value);
-            if (cur != NULL && cur->next != NULL) printf(", ");
+//            if (cur != NULL && cur->next != NULL) printf(", ");
         }
     }
     else if (strcmp(type, "CONST_DECLARATIONS") == 0) {
@@ -101,7 +101,7 @@ void do_ge_table(ASTNode *node){
         ASTNode *idlist_node = ast_node_get_attr_node_value(node, "IDLIST");
         for (ASTNodeAttr *cur = (idlist_node->first_attr); cur; (cur) = (cur)->next) {
 //            printf("%s\n", cur->value);
-            if (cur != NULL && cur->next != NULL) printf(", ");
+//            if (cur != NULL && cur->next != NULL) printf(", ");
             add_symbol(cur->value,var_type_second,0,scope,0,0);
         }
         do_ge_table(ast_node_get_attr_node_value(node, "IDLIST"));
@@ -130,7 +130,7 @@ void do_ge_table(ASTNode *node){
             ASTNode *period_node = (ASTNode *) cur->value;
             char *period_begin = ast_node_get_attr_str_value(period_node, "PERIOD_BEGIN");
             char *period_end = ast_node_get_attr_str_value(period_node, "PERIOD_END");
-            printf("[%d]", atoi(period_end) - atoi(period_begin) + 1);
+//            printf("[%d]", atoi(period_end) - atoi(period_begin) + 1);
         }
     }
     else if (strcmp(type, "SUBPROGRAM_DECLARATIONS_LIST") == 0) {
@@ -183,7 +183,7 @@ void do_ge_table(ASTNode *node){
 //        var_type = var_type;
         for (ASTNodeAttr *cur = (ast_node_get_attr_node_value(node, "IDLIST")->first_attr); cur; (cur) = (cur)->next) {
 //            printf("%s *%s", var_type, cur->value);
-            if (cur != NULL && cur->next != NULL) printf(", ");
+//            if (cur != NULL && cur->next != NULL) printf(", ");
             add_symbol(cur->value,var_type,0,scope,is_arg,ref);
         }
     } else if (strcmp(type, "VALUE_PARAMETER") == 0) {
