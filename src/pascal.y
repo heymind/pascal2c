@@ -178,7 +178,7 @@ type_declarations:T_TYPE type_declaration
     {
         ASTNode *node = ast_node_create_without_pos("TYPE_DECLARATIONS");
 
-        ast_node_attr_node_append(node,"TYPE_DECLARATIONS_LIST",$2);
+        ast_node_attr_node_append(node,"TYPE_DECLARATION_LIST",$2);
 
         $$ = node;
     }
@@ -269,9 +269,6 @@ type:T_BASIC_TYPE
     {
     	ASTNodePos * pos = ast_node_pos_create(lex_row_num, lex_column_num-yyleng, lex_row_num, lex_column_num);
         ASTNode *node = ast_node_create("TYPE",pos);
-        if(!find_array_type(new_types, $1)){
-             yyerror("");
-       	}
         ast_node_set_attr_str(node,"BASIC_TYPE",$1);
         $$ = node;
     }
@@ -287,7 +284,7 @@ period_list: period period_list_
 
 period_list_: T_COMMA period period_list_
     {
-	    ASTNodeAttr *attr = ast_node_attr_create_node("PERIOD",$2);
+	ASTNodeAttr *attr = ast_node_attr_create_node("PERIOD",$2);
         ast_node_attr_append(attr, $3);
         $$ = attr;
     }
@@ -295,11 +292,9 @@ period_list_: T_COMMA period period_list_
 
 period: T_NUM T_DOT T_DOT T_NUM
     {
-    	ASTNodeAttr *attr1 = ast_node_attr_create_str("PERIOD_BEGIN",$1);
-    	ASTNodeAttr *attr2 = ast_node_attr_create_str("PERIOD_END",$4);
     	ASTNode *node = ast_node_create_without_pos("PERIOD");
-    	node->first_attr = attr1;
-    	ast_node_attr_append(node->first_attr, attr2);
+    	ast_node_set_attr_str(node, "PERIOD_BEGIN", $1);
+    	ast_node_set_attr_str(node, "PERIOD_END", $4);
     	$$ = node;
     }
 
