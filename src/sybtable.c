@@ -56,15 +56,16 @@ void do_ge_table(ASTNode *node){
 //        printf("%s\n",ast_node_get_attr_str_value(node, "ID"));
         do_ge_table(ast_node_get_attr_node_value(node, "CONST_VALUE"));
         add_symbol(ast_node_get_attr_str_value(node, "ID"),"const",0,scope,0,0);
-    } else if (strcmp(type, "CONST_VALUE") == 0) {
+    } else if (strcmp(type, "CONST_VALUE") == 0){
 //        printf("CONST_VALUE\n");
-    } else if (ast_node_get_attr(node, "T_NUM") != NULL) {
+        if (ast_node_get_attr(node, "T_NUM") != NULL) {
 //        printf("%s", ast_node_get_attr_str_value(node, "T_NUM"));
-    } else if (ast_node_get_attr(node, "T_MINUS") != NULL) {
-//        printf("-%s", ast_node_get_attr_str_value(node, "T_MINUS"));
-    } else if (ast_node_get_attr(node, "T_LETTER") != NULL) {
-//        printf("\"%s\"", ast_node_get_attr_str_value(node, "T_LETTER"));
-    } else if (strcmp(type, "TYPE_DECLARATIONS") == 0) {
+        } else if (ast_node_get_attr(node, "T_MINUS") != NULL) {
+    //        printf("-%s", ast_node_get_attr_str_value(node, "T_MINUS"));
+        } else if (ast_node_get_attr(node, "T_LETTER") != NULL) {
+    //        printf("\"%s\"", ast_node_get_attr_str_value(node, "T_LETTER"));
+        }
+    }else if (strcmp(type, "TYPE_DECLARATIONS") == 0) {
         do_ge_table(ast_node_get_attr_node_value(node, "TYPE_DECLARATION_LIST"));
     } else if (strcmp(type, "TYPE_DECLARATION_LIST") == 0) {
         for (ASTNodeAttr *cur = node->first_attr; cur; (cur) = (cur)->next) {
