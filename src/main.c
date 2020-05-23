@@ -3,6 +3,7 @@
 #include "ast.h"
 #include "codegen.h"
 #include "error.h"
+#include "sybtable.h"
 
 extern FILE *yyin;
 
@@ -30,7 +31,7 @@ int main(int argc, char *argv[]) {
             }
         }
     } else {
-        if ((yyin = fopen("../sample_pas/gcd.pas", "r")) == NULL) {
+        if ((yyin = fopen("../ci_test/cases/basic_programstruct.pas", "r")) == NULL) {
             printf("Can't open file %s\n", argv[1]);
             return -1;
         }
@@ -38,6 +39,7 @@ int main(int argc, char *argv[]) {
     yyparse();
     //    printf("%s", root->first_attr->value);
     ast_node_dump_json(root, "step0.json");
+    ge_syb_table(root);
     generate_c_code(root, stdout);
 
 }
