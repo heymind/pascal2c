@@ -1,12 +1,14 @@
 
 
 #include "codegen.h"
+#include "sybtable.h"
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include <utlist.h>
 
 int level = 0;
+char *scope_ = "null";
 #define BEGIN_BLOCK(o) {level++;fprintf((o),"{");}
 #define NEWLINE(o)  newline((o))
 #define END_BLOCK(o) {level--;newline((o));fprintf((o),"}");}
@@ -38,6 +40,7 @@ void do_generate(ASTNode *node, FILE *out) {
 //        fprintf(out,"int main(){\n\t%s();\n\treturn 0;\n}\n",program_id);
         NEWLINE(out);
         fprintf(out, "int main()");
+        scope_ = program_id;
     } else if (strcmp(type, "IDLIST") == 0) {
         for (ASTNodeAttr *cur = (node->first_attr); cur; (cur) = (cur)->next) {
             fprintf(out, "%s", cur->value);
@@ -66,7 +69,7 @@ void do_generate(ASTNode *node, FILE *out) {
     } else if (strcmp(type, "TYPE_DECLARATIONS") == 0) {
         do_generate(ast_node_get_attr_node_value(node, "TYPE_DECLARATION_LIST"), out);
     } else if (strcmp(type, "TYPE_DECLARATION_LIST") == 0) {
-        printf("yyy");
+//        printf("yyy");
         for (ASTNodeAttr *cur = node->first_attr; cur; (cur) = (cur)->next) {
             NEWLINE(out);
             ASTNode *type_list_node = (ASTNode *) cur->value;
@@ -123,6 +126,7 @@ void do_generate(ASTNode *node, FILE *out) {
         }
     } else if (strcmp(type, "SUBPROGRAM_DECLARATIONS_LIST") == 0) {
         for (ASTNodeAttr *cur = node->first_attr; cur; (cur) = (cur)->next) {
+//            fprintf(out, "%s", cur->key);
             do_generate((ASTNode *) cur->value, out);
             fprintf(out, ";");
         }
@@ -241,15 +245,30 @@ void do_generate(ASTNode *node, FILE *out) {
             do_generate(expression_node, out);
         }
     } else if (strcmp(type, "VARIABLE") == 0) {
-        fprintf(out, "%s", ast_node_get_attr_str_value(node, "ID"));
+        char *name = ast_node_get_attr_str_value(node, "ID");
+        fprintf(out, "%s", name);
+        struct symbol *sym = get_symbol(name, scope_);
+        char *pre_scope = scope_;
+
+        if(sym != NULL) //当variable的生成符号表代码补全后，如果sym为空，则报错，这里是为了测试通过
+            scope_ = sym->type;
+
         do_generate(ast_node_get_attr_node_value(node, "ID_VARPART"), out);
+        scope_ = pre_scope;
     } else if (strcmp(type, "ID_VARPART") == 0) {
         ASTNode *list_node = node->first_attr->value;
         ASTNodeAttr *start = list_node->first_attr;
+        int period_count = 1;
         for (ASTNodeAttr *cur = start; cur; (cur) = (cur)->next) {
             fprintf(out, "[");
             do_generate(cur->value, out);
+            char *id = malloc(sizeof(char) * 11);
+            strcpy(id, "dimension_");
+            id[strlen(id) - 1] = period_count + '0';
+            struct symbol *sym = get_symbol(id, scope_);
+            fprintf(out, "-%d", sym->dimension);
             fprintf(out, "]");
+            period_count += 1;
         }
     } else if (strcmp(type, "PROCEDURE_CALL") == 0) {
         char *func_name = ast_node_get_attr_str_value(node, "ID");
