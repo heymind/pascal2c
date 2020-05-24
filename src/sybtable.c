@@ -109,17 +109,26 @@ void do_ge_table(ASTNode *node){
         for (ASTNodeAttr *cur = (ast_node_get_attr_node_value(node, "PERIOD_LIST"))->first_attr; cur; (cur) = (cur)->next) {
             period_count += 1;
             ASTNode *period = cur->value;
-            int period_begin = atoi(ast_node_get_attr_str_value(period, "PERIOD_BEGIN"));
+            int period_end = atoi(ast_node_get_attr_str_value(period, "PERIOD_END"));
             char *id = malloc(sizeof(char) * 11);
             strcpy(id, "dimension_");
             id[strlen(id) - 1] = period_count + '0';
-            add_symbol(id, var_type, period_begin, name, 0, 0);
+            add_symbol(id, var_type, period_end, name, 0, 0);
         }
         add_symbol(name, "array", period_count, scope, 0, 0);
     } else if (strcmp(type, "RECORD") == 0) {
-//        printf("RECORD\n");
-//        printf("struct %s", ast_node_get_attr_str_value(node, "ID"));
-        do_ge_table(ast_node_get_attr_node_value(node, "VAR_DECLARATION_LIST"));
+        char *name = ast_node_get_attr_str_value(node, "ID");
+        char *var_type = "record";
+        ASTNode *member_list = ast_node_get_attr_node_value(node, "TYPE_RECORD_DECLARATION");
+        char *pre_scope = scope;
+        scope = name;
+        int member_count = 0;
+        for (ASTNodeAttr *cur = member_list->first_attr; cur; (cur) = (cur)->next){
+            do_ge_table(cur->value);
+            member_count += 1;
+        }
+        scope = pre_scope;
+        add_symbol(name, var_type, member_count, scope, 0, 0);
     } else if (strcmp(type, "TYPE_RECORD_DECLARATION") == 0) {
 //        printf("TYPE_RECORD_DECLARATION\n");
         for (ASTNodeAttr *cur = node->first_attr; cur; (cur) = (cur)->next) {
