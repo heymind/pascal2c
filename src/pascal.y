@@ -537,6 +537,15 @@ variable:T_ID id_varpart
         ast_node_attr_node_append(node, "ID_VARPART", $2);
         $$ = node;
     }
+    |T_ID T_DOT T_ID
+    {
+    	ASTNodePos * pos = ast_node_pos_create(lex_row_num, lex_column_num-yyleng, lex_row_num, lex_column_num);
+        ASTNode *node = ast_node_create("VARIABLE",pos);
+        ast_node_set_attr_str(node, "ID", $1);
+        ast_node_set_attr_str(node, "MEMBER", $3);
+//        ast_node_attr_node_append(node, "ID_VARPART", $4);
+        $$ = node;
+    }
 
 id_varpart: T_SOBRACKET expression_list T_SCBRACKET
     {
