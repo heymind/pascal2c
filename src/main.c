@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
     //sef
     //    printf("%s", root->first_attr->value);
     ast_node_dump_json(root, "step0.json");
-<<<<<<< Updated upstream
+    <<<<<<< Updated upstream
     ge_syb_table(root,stdout);
     generate_c_code(root,stdout);
 
@@ -101,12 +101,12 @@ int main(int argc, char *argv[])
     //        ast_node_attr_node_append(program_node,"MAIN_STMTS",assign);
     //
     //        ast_node_dump_json(program_node,"step5.json");
-=======
+    =======
     ge_syb_table(root);
 //    print_symbol_table();
     generate_c_code(root, stdout);
     destroy_syb_table();
->>>>>>> Stashed changes
+    >>>>>>> Stashed changes
 }
 
 int yyerror(char *errstr)
