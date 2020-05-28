@@ -24,14 +24,15 @@ struct symbol{
     int dimension;
     const char *scope;
     struct symbol *next;
-    int is_arg;//参数
+    int arg;//参数
     int ref;//引用方式 1->传值调用  2->引用调用
 };
 
 
 void do_ge_table(ASTNode *node);
-void add_symbol(char *name, char *type, int dimension, char *scope, int is_arg,int ref);
+void add_symbol(char *name, char *type, int dimension, char *scope, int arg,int ref);
 struct symbol* get_symbol(char *name, char *scope);
+struct symbol* get_symbol_by_arg(int arg, char *scope);
 void print_symbol_table();
 void ge_syb_table(ASTNode *root);
 

@@ -8,7 +8,7 @@
 #include <utlist.h>
 
 int level = 0;
-char *scope_ = "null";
+char *scope_ = NULL;
 #define BEGIN_BLOCK(o) {level++;fprintf((o),"{");}
 #define NEWLINE(o)  newline((o))
 #define END_BLOCK(o) {level--;newline((o));fprintf((o),"}");}
@@ -178,8 +178,9 @@ void do_generate(ASTNode *node, FILE *out) {
         } else {
             fprintf(out, "void ");
         }
-
-        fprintf(out, "%s(", ast_node_get_attr_str_value(node, "ID"));
+        char *func_name = ast_node_get_attr_str_value(node, "ID");
+        scope_  = func_name;
+        fprintf(out, "%s(",func_name );
         do_generate(ast_node_get_attr_node_value(node, "FORMAL_PARAMETER"), out);
         fprintf(out, ")");
     } else if (strcmp(type, "FORMAL_PARAMETER") == 0) {
@@ -282,17 +283,23 @@ void do_generate(ASTNode *node, FILE *out) {
         }
     } else if (strcmp(type, "VARIABLE") == 0) {
         char *name = ast_node_get_attr_str_value(node, "ID");
-        fprintf(out, "%s", name);
+        struct symbol *sym = get_symbol(name, scope_);
+        if(sym && sym->arg && sym->ref == 2) {
+            fprintf(out, "*%s", name);
+        } else {
+            fprintf(out, "%s", name);
+        }
+
         if(ast_node_get_attr_str_value(node, "MEMBER")){
             char *member = ast_node_get_attr_str_value(node, "MEMBER");
-            struct symbol *sym = get_symbol(name, scope_);
+
             if(sym != NULL){
                 fprintf(out, ".%s", member);
             } else{
                 //error
             }
         } else{
-            struct symbol *sym = get_symbol(name, scope_);
+
             char *pre_scope = scope_;
             if(sym != NULL) //当variable的生成符号表代码补全后，如果sym为空，则报错，这里是为了测试通过
                 scope_ = sym->type;
@@ -322,7 +329,20 @@ void do_generate(ASTNode *node, FILE *out) {
             fprintf(out, "%s(", func_name);
         }
         if (ast_node_get_attr_node_value(node, "EXPRESSION_LIST") != NULL) {
-            do_generate(ast_node_get_attr_node_value(node, "EXPRESSION_LIST"), out);
+            node = ast_node_get_attr_node_value(node, "EXPRESSION_LIST");
+            ASTNode *expression_node;
+            int arg = 1;
+            for (ASTNodeAttr *cur = node->first_attr; cur; (cur) = (cur)->next) {
+                expression_node = (ASTNode *) cur->value;
+                struct symbol *sym = get_symbol_by_arg(arg++,func_name);
+                if(sym && sym->ref == 2) {
+                    fprintf(out, "&");
+                }
+                do_generate(expression_node, out);
+                if (cur != NULL && cur->next != NULL) {
+                    fprintf(out, ", ");
+                }
+            }
         }
         fprintf(out, ");");
 

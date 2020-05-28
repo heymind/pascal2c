@@ -1,6 +1,6 @@
 program basic_line(input,output);
 var a,b,c,d,e:integer;
-procedure pro_test(var x,y:integer);
+procedure pro_test(x,y:integer);
   begin
     if x = 1 then a := 1
     else a := 0;

@@ -14,7 +14,7 @@
 struct symbol* head= NULL;
 struct symbol* end = NULL;
 char *scope = "null";
-int is_arg = 0;
+int arg = 0;
 int ref = 0;
 
 void do_ge_table(ASTNode *node){
@@ -181,10 +181,10 @@ void do_ge_table(ASTNode *node){
         }
     } else if (strcmp(type, "PARAMETER") == 0) {
 //        printf("PARAMETER\n");
-        is_arg = 1;
+        arg = 1;
         do_ge_table(ast_node_get_attr_node_value(node,"VAR_PARAMETER"));
         do_ge_table(ast_node_get_attr_node_value(node,"VALUE_PARAMETER"));
-        is_arg = 0;
+        arg = 0;
     } else if (strcmp(type, "VAR_PARAMETER") == 0) {
 //        printf( "VAR_PARAMETER\n");
         ref = 2;
@@ -194,7 +194,7 @@ void do_ge_table(ASTNode *node){
         for (ASTNodeAttr *cur = (ast_node_get_attr_node_value(node, "IDLIST")->first_attr); cur; (cur) = (cur)->next) {
 //            printf("%s *%s", var_type, cur->value);
 //            if (cur != NULL && cur->next != NULL) printf(", ");
-            add_symbol(cur->value,var_type,0,scope,is_arg,ref);
+            add_symbol(cur->value,var_type,0,scope,arg++,ref);
         }
     } else if (strcmp(type, "VALUE_PARAMETER") == 0) {
 //        printf("VALUE_PARAMETER\n");
@@ -203,14 +203,14 @@ void do_ge_table(ASTNode *node){
         for (ASTNodeAttr *cur = (ast_node_get_attr_node_value(node, "IDLIST")->first_attr); cur; (cur) = (cur)->next) {
 //            printf("%s %s", var_type, cur->value);
 //            if (cur != NULL && cur->next != NULL) printf(", ");
-            add_symbol(cur->value,var_type,0,scope,is_arg,ref);
+            add_symbol(cur->value,var_type,0,scope,arg++,ref);
         }
     } else {
 //        printf("else:%s\n", type);
     }
 }
 
-void add_symbol(char *name, char *type, int dimension, char *scope, int is_arg,int ref)
+void add_symbol(char *name, char *type, int dimension, char *scope, int arg,int ref)
 {
     struct symbol* temp = (struct symbol*)malloc(LEN);
 
@@ -218,7 +218,7 @@ void add_symbol(char *name, char *type, int dimension, char *scope, int is_arg,i
     temp->type = type;
     temp->dimension = dimension;
     temp->scope = scope;
-    temp->is_arg = is_arg;
+    temp->arg = arg;
     temp->ref = ref;
     temp->next = NULL;
 
@@ -232,14 +232,24 @@ void add_symbol(char *name, char *type, int dimension, char *scope, int is_arg,i
     }
     end = temp;
 }
-
+struct symbol*  get_symbol_by_arg(int arg, char *scope) {
+    struct symbol *temp = head;
+    while (temp != NULL)
+    {
+        if(temp->arg == arg && strcmp(temp->scope, scope) == 0) {
+            return temp;
+        }
+        temp = temp->next;
+    }
+    return NULL;
+}
 struct symbol* get_symbol(char *name, char *scope)
 {
     struct symbol *temp = head;
     while (temp != NULL)
     {
         if(strcmp(temp->name, name) == 0 && strcmp(temp->scope, scope) == 0) {
-//            printf("%s\t%s\t%d\t%s\t%d\t%d\n", temp->name, temp->type, temp->dimension, temp->scope, temp->is_arg,
+//            printf("%s\t%s\t%d\t%s\t%d\t%d\n", temp->name, temp->type, temp->dimension, temp->scope, temp->arg,
 //                   temp->ref);
             return temp;
         }
@@ -251,11 +261,11 @@ struct symbol* get_symbol(char *name, char *scope)
 void print_symbol_table()
 {
     struct symbol *temp = head;
-    printf("%20s\t%10s\t%10s\t\t%20s\t\t%10s\t\t%10s\n", "name", "type", "dimension", "scope", "is_arg", "ref");
+    printf("%20s\t%10s\t%10s\t\t%20s\t\t%10s\t\t%10s\n", "name", "type", "dimension", "scope", "arg", "ref");
     printf("---------------------------------------------------------------------------------------------------------------\n");
     while (temp != NULL)
     {
-        printf("%20s\t%10s\t%10d\t\t%20s\t\t%10d\t\t%10d\n",temp->name,temp->type,temp->dimension,temp->scope,temp->is_arg,temp->ref);
+        printf("%20s\t%10s\t%10d\t\t%20s\t\t%10d\t\t%10d\n",temp->name,temp->type,temp->dimension,temp->scope,temp->arg,temp->ref);
         temp = temp->next;
     }
 }
