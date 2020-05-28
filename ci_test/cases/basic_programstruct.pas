@@ -6,7 +6,8 @@ const
 var
   r : Integer;
   a : Integer;
-function area(r: Integer): Integer;
+function area( asr: Integer): Integer;
+var rr: Integer;
 begin
   a := r * r * NUMBER_3
 end;
