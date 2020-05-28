@@ -42,7 +42,8 @@ int main(int argc, char *argv[]) {
     ge_syb_table(root);
 //    print_symbol_table();
     generate_c_code(root, stdout);
-
+    destroy_syb_table();
+//    print_symbol_table();
 }
 
 int yyerror(char *errstr) {

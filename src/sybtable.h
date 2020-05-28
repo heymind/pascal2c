@@ -34,6 +34,7 @@ void add_symbol(char *name, char *type, int dimension, char *scope, int is_arg,i
 struct symbol* get_symbol(char *name, char *scope);
 void print_symbol_table();
 void ge_syb_table(ASTNode *root);
+void destroy_syb_table();
 
 #endif //PASCAL2C_SYBTABLE_H
 //#endif //PASCAL2C_SYBTABLE_H
