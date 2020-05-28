@@ -205,7 +205,12 @@ void do_ge_table(ASTNode *node){
 //            if (cur != NULL && cur->next != NULL) printf(", ");
             add_symbol(cur->value,var_type,0,scope,arg++,ref);
         }
-    } else {
+    } else if (strcmp(type, "SUBPROGRAM_BODY") == 0) {
+        do_ge_table(ast_node_get_attr_node_value(node, "CONST_DECLARATIONS"));
+        do_ge_table(ast_node_get_attr_node_value(node, "VAR_DECLARATIONS"));
+        do_ge_table(ast_node_get_attr_node_value(node, "COMPOUND_STATEMENT"));
+    }
+    else {
 //        printf("else:%s\n", type);
     }
 }
@@ -276,4 +281,14 @@ void ge_syb_table(ASTNode *root) {
 //    printf("\nsymbol table:\n");
 //    print_symbol_table();
 //    printf("\n");
+}
+
+void destroy_syb_table(){
+    struct symbol* temp;
+    while (head != NULL)
+    {
+        temp = head;
+        head = temp->next;
+        free(temp);
+    }
 }
