@@ -40,6 +40,7 @@ int main(int argc, char *argv[]) {
     //    printf("%s", root->first_attr->value);
     ast_node_dump_json(root, "step0.json");
     ge_syb_table(root);
+//    print_symbol_table();
     generate_c_code(root, stdout);
 
 }
