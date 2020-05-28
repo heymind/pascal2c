@@ -106,6 +106,16 @@ void do_ge_table(ASTNode *node, FILE *out){
             printf("%s %s", var_type, cur->value);
             if (cur != NULL && cur->next != NULL) printf(", ");
         }
+<<<<<<< Updated upstream
+=======
+    } else if (strcmp(type, "SUBPROGRAM_BODY") == 0) {
+        do_ge_table(ast_node_get_attr_node_value(node, "CONST_DECLARATIONS"));
+        do_ge_table(ast_node_get_attr_node_value(node, "VAR_DECLARATIONS"));
+        do_ge_table(ast_node_get_attr_node_value(node, "COMPOUND_STATEMENT"));
+    }
+    else {
+//        printf("else:%s\n", type);
+>>>>>>> Stashed changes
     }
 }
 
@@ -145,5 +155,22 @@ struct symbol* get_symbol(char *name, char *scope,struct symbol *table)
 
 void ge_syb_table(ASTNode *root, FILE *out) {
     assert(root != NULL && "ROOT SHOULD NOT BE NULL");
+<<<<<<< Updated upstream
     do_ge_table(root,out);
+=======
+    do_ge_table(root);
+//    printf("\nsymbol table:\n");
+//    print_symbol_table();
+//    printf("\n");
+}
+
+void destroy_syb_table(){
+    struct symbol* temp;
+    while (head != NULL)
+    {
+        temp = head;
+        head = temp->next;
+        free(temp);
+    }
+>>>>>>> Stashed changes
 }
