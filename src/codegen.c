@@ -225,9 +225,9 @@ void do_generate(ASTNode *node, FILE *out) {
         //这里必须保证TYPE节点是STATEMENT的第一个属性
         if (strcmp(node->first_attr->value, "WHILE") == 0) {
             fprintf(out, "while(");
-            BEGIN_BLOCK(out);
             do_generate(ast_node_get_attr_node_value(node, "EXPRESSION"), out);
             fprintf(out, ")");
+            BEGIN_BLOCK(out);
             do_generate(ast_node_get_attr_node_value(node, "STATEMENT"), out);
             END_BLOCK(out);
         } else if (ast_node_get_attr_node_value(node, "VARIABLE") != NULL) {
