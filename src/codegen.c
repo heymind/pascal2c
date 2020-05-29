@@ -187,10 +187,10 @@ void do_generate(ASTNode *node, FILE *out) {
         BEGIN_BLOCK(out);
         if (strcmp(func_type,"void")!=0){
             NEWLINE(out);
-            fprintf(out, "%s %s;", func_type, para_name);
+            fprintf(out, "%s _%s;", func_type, para_name);
             do_generate(ast_node_get_attr_node_value(node, "SUBPROGRAM_BODY"), out);
             NEWLINE(out);
-            fprintf(out, "return %s;", para_name);
+            fprintf(out, "return _%s;", para_name);
         }
         else{
             do_generate(ast_node_get_attr_node_value(node, "SUBPROGRAM_BODY"), out);
@@ -310,7 +310,11 @@ void do_generate(ASTNode *node, FILE *out) {
         struct symbol *sym = get_symbol(name, scope_);
         if(sym && sym->arg && sym->ref == 2) {
             fprintf(out, "*%s", name);
-        } else {
+        }
+        else if (sym && strcmp(sym->name,sym->scope)==0){
+            fprintf(out, "_%s", name);
+        }
+        else {
             fprintf(out, "%s", name);
         }
 
