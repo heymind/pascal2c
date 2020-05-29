@@ -18,4 +18,6 @@ void generate_read(ASTNode *node, FILE *out);
 
 void generate_subprogram_defs(ASTNode *node, FILE *out);
 
+int is_basic_type(char *type);
+
 #endif //PASCAL2C_CODEGEN_H

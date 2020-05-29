@@ -1,12 +1,14 @@
 
 
 #include "codegen.h"
+#include "sybtable.h"
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include <utlist.h>
 
 int level = 0;
+char *scope_ = NULL;
 #define BEGIN_BLOCK(o) {level++;fprintf((o),"{");}
 #define NEWLINE(o)  newline((o))
 #define END_BLOCK(o) {level--;newline((o));fprintf((o),"}");}
@@ -21,12 +23,14 @@ void do_generate(ASTNode *node, FILE *out) {
     char *type = node->type;
     if (strcmp(type, "PROGRAM_STRUCT") == 0) {
         fprintf(out, "#include <stdio.h>");
+        do_generate(ast_node_get_attr_node_value(node, "PROGRAM_HEAD"), out);
         do_generate(ast_node_get_attr_node_value(node, "CONST_DECLARATIONS"), out);
         do_generate(ast_node_get_attr_node_value(node, "TYPE_DECLARATIONS"), out);
         do_generate(ast_node_get_attr_node_value(node, "VAR_DECLARATIONS"), out);
         generate_subprogram_defs(ast_node_get_attr_node_value(node, "SUBPROGRAM_DECLARATIONS_LIST"), out);
         do_generate(ast_node_get_attr_node_value(node, "SUBPROGRAM_DECLARATIONS_LIST"), out);
-        do_generate(ast_node_get_attr_node_value(node, "PROGRAM_HEAD"), out);
+        NEWLINE(out);
+        fprintf(out, "int main()");
         BEGIN_BLOCK(out);
         do_generate(ast_node_get_attr_node_value(node, "COMPOUND_STATEMENT"), out);
         NEWLINE(out);
@@ -36,13 +40,29 @@ void do_generate(ASTNode *node, FILE *out) {
     } else if (strcmp(type, "PROGRAM_HEAD") == 0) {
         char *program_id = ast_node_get_attr_str_value(node, "ID");
 //        fprintf(out,"int main(){\n\t%s();\n\treturn 0;\n}\n",program_id);
-        NEWLINE(out);
-        fprintf(out, "int main()");
+//        NEWLINE(out);
+//        fprintf(out, "int main()");
+        scope_ = program_id;
     } else if (strcmp(type, "IDLIST") == 0) {
+        int period_count = 1;
+        char *id_varpart = malloc(sizeof(char) * 20);
+        strcpy(id_varpart, "");
+        while(1){
+            char *id = malloc(sizeof(char) * 11);
+            strcpy(id, "dimension_");
+            id[strlen(id) - 1] = period_count + '0';
+            struct symbol *sym = get_symbol(id, scope_);
+            free(id);
+            if(sym == NULL)
+                break;
+            sprintf(id_varpart + strlen(id_varpart), "[%d]", sym->dimension);
+            period_count += 1;
+        }
         for (ASTNodeAttr *cur = (node->first_attr); cur; (cur) = (cur)->next) {
-            fprintf(out, "%s", cur->value);
+            fprintf(out, "%s%s", cur->value, id_varpart);
             if (cur != NULL && cur->next != NULL) fprintf(out, ", ");
         }
+        free(id_varpart);
     } else if (strcmp(type, "CONST_DECLARATIONS") == 0) {
         do_generate(ast_node_get_attr_node_value(node, "CONST_DECLARATION_LIST"), out);
     } else if (strcmp(type, "CONST_DECLARATION_LIST") == 0) {
@@ -61,16 +81,16 @@ void do_generate(ASTNode *node, FILE *out) {
         } else if (ast_node_get_attr(node, "T_MINUS") != NULL) {
             fprintf(out, "-%s", ast_node_get_attr_str_value(node, "T_MINUS"));
         } else if (ast_node_get_attr(node, "T_LETTER") != NULL) {
-            fprintf(out, "\"%s\"", ast_node_get_attr_str_value(node, "T_LETTER"));
+            fprintf(out, "%s", ast_node_get_attr_str_value(node, "T_LETTER"));
         }
     } else if (strcmp(type, "TYPE_DECLARATIONS") == 0) {
         do_generate(ast_node_get_attr_node_value(node, "TYPE_DECLARATION_LIST"), out);
     } else if (strcmp(type, "TYPE_DECLARATION_LIST") == 0) {
-        printf("yyy");
         for (ASTNodeAttr *cur = node->first_attr; cur; (cur) = (cur)->next) {
             NEWLINE(out);
             ASTNode *type_list_node = (ASTNode *) cur->value;
-            do_generate(type_list_node, out);
+            if(strcmp(type_list_node->type, "RECORD") == 0)
+                do_generate(type_list_node, out);
         }
     } else if (strcmp(type, "VAR_DECLARATION_LIST") == 0) {
         for (ASTNodeAttr *cur = node->first_attr; cur; (cur) = (cur)->next) {
@@ -84,16 +104,32 @@ void do_generate(ASTNode *node, FILE *out) {
             do_generate(type_list_node, out);
         }
     } else if (strcmp(type, "VAR_DECLARATION") == 0) {
-//        do_generate(ast_node_get_attr_node_value(node, "VAR_DECLARATION"), out);
         NEWLINE(out);
         ASTNode *type_node = ast_node_get_attr_node_value(node, "TYPE");
         do_generate(type_node, out);
-//        do_generate(ast_node_get_attr_node_value(node, ""), out);
+        char *pre_scope = scope_;
+        scope_ = ast_node_get_attr_str_value(type_node, "BASIC_TYPE");
         do_generate(ast_node_get_attr_node_value(node, "IDLIST"), out);
+        scope_ = pre_scope;
         fprintf(out, ";");
     } else if (strcmp(type, "TYPE") == 0) {
         char *var_type_second = ast_node_get_attr_str_value(node, "BASIC_TYPE");
-        fprintf(out, "%s ", var_type_change(var_type_second));
+        if(is_basic_type(var_type_second))
+            fprintf(out, "%s ", var_type_change(var_type_second));
+        else{
+            struct symbol *sym = get_symbol(var_type_second, scope_);
+            if(sym == NULL){
+                //error no this type
+            } else if(strcmp(sym->type, "array") == 0) {
+                char *name = sym->name;
+                char *id = "dimension1";
+                struct symbol *sub_sym = get_symbol(id, name);
+                fprintf(out, "%s ", var_type_change(sub_sym->type));
+            } else if(strcmp(sym->type, "record") == 0){
+                char *name = sym->name;
+                fprintf(out, "struct %s ", name);
+            }
+        }
     } else if (strcmp(type, "ARRAY") == 0) {
         NEWLINE(out);
         char *var_type = ast_node_get_attr_str_value(node, "BASIC_TYPE");
@@ -105,7 +141,10 @@ void do_generate(ASTNode *node, FILE *out) {
         NEWLINE(out);
         fprintf(out, "struct %s", ast_node_get_attr_str_value(node, "ID"));
         BEGIN_BLOCK(out)
-        do_generate(ast_node_get_attr_node_value(node, "VAR_DECLARATION_LIST"), out);
+        ASTNode *member_list = ast_node_get_attr_node_value(node, "TYPE_RECORD_DECLARATION");
+        for (ASTNodeAttr *cur = member_list->first_attr; cur; (cur) = (cur)->next){
+            do_generate(cur->value, out);
+        }
         END_BLOCK(out);
         fprintf(out, ";");
     } else if (strcmp(type, "TYPE_RECORD_DECLARATION") == 0) {
@@ -123,6 +162,7 @@ void do_generate(ASTNode *node, FILE *out) {
         }
     } else if (strcmp(type, "SUBPROGRAM_DECLARATIONS_LIST") == 0) {
         for (ASTNodeAttr *cur = node->first_attr; cur; (cur) = (cur)->next) {
+//            fprintf(out, "%s", cur->key);
             do_generate((ASTNode *) cur->value, out);
             fprintf(out, ";");
         }
@@ -164,7 +204,9 @@ void do_generate(ASTNode *node, FILE *out) {
         } else {
             fprintf(out, "void ");
         }
-        fprintf(out, "%s(", ast_node_get_attr_str_value(node, "ID"));
+        char *func_name = ast_node_get_attr_str_value(node, "ID");
+        scope_  = func_name;
+        fprintf(out, "%s(",func_name );
         do_generate(ast_node_get_attr_node_value(node, "FORMAL_PARAMETER"), out);
         fprintf(out, ")");
     } else if (strcmp(type, "FORMAL_PARAMETER") == 0) {
@@ -208,9 +250,9 @@ void do_generate(ASTNode *node, FILE *out) {
         //这里必须保证TYPE节点是STATEMENT的第一个属性
         if (strcmp(node->first_attr->value, "WHILE") == 0) {
             fprintf(out, "while(");
-            BEGIN_BLOCK(out);
             do_generate(ast_node_get_attr_node_value(node, "EXPRESSION"), out);
             fprintf(out, ")");
+            BEGIN_BLOCK(out);
             do_generate(ast_node_get_attr_node_value(node, "STATEMENT"), out);
             END_BLOCK(out);
         } else if (ast_node_get_attr_node_value(node, "VARIABLE") != NULL) {
@@ -264,11 +306,37 @@ void do_generate(ASTNode *node, FILE *out) {
             do_generate(expression_node, out);
         }
     } else if (strcmp(type, "VARIABLE") == 0) {
-        fprintf(out, "%s", ast_node_get_attr_str_value(node, "ID"));
-        do_generate(ast_node_get_attr_node_value(node, "ID_VARPART"), out);
+        char *name = ast_node_get_attr_str_value(node, "ID");
+        struct symbol *sym = get_symbol(name, scope_);
+        if(sym && sym->arg && sym->ref == 2) {
+            fprintf(out, "*%s", name);
+        } else {
+            fprintf(out, "%s", name);
+        }
+
+        if(ast_node_get_attr_str_value(node, "MEMBER")){
+            char *member = ast_node_get_attr_str_value(node, "MEMBER");
+
+            if(sym != NULL){
+                fprintf(out, ".%s", member);
+            } else{
+                //error
+            }
+        } else{
+
+            char *pre_scope = scope_;
+            if(sym != NULL) //当variable的生成符号表代码补全后，如果sym为空，则报错，这里是为了测试通过
+                scope_ = sym->type;
+            else{
+                //error
+            }
+            do_generate(ast_node_get_attr_node_value(node, "ID_VARPART"), out);
+            scope_ = pre_scope;
+        }
     } else if (strcmp(type, "ID_VARPART") == 0) {
         ASTNode *list_node = node->first_attr->value;
         ASTNodeAttr *start = list_node->first_attr;
+        int period_count = 1;
         for (ASTNodeAttr *cur = start; cur; (cur) = (cur)->next) {
             fprintf(out, "[");
             do_generate(cur->value, out);
@@ -285,7 +353,20 @@ void do_generate(ASTNode *node, FILE *out) {
             fprintf(out, "%s(", func_name);
         }
         if (ast_node_get_attr_node_value(node, "EXPRESSION_LIST") != NULL) {
-            do_generate(ast_node_get_attr_node_value(node, "EXPRESSION_LIST"), out);
+            node = ast_node_get_attr_node_value(node, "EXPRESSION_LIST");
+            ASTNode *expression_node;
+            int arg = 1;
+            for (ASTNodeAttr *cur = node->first_attr; cur; (cur) = (cur)->next) {
+                expression_node = (ASTNode *) cur->value;
+                struct symbol *sym = get_symbol_by_arg(arg++,func_name);
+                if(sym && sym->ref == 2) {
+                    fprintf(out, "&");
+                }
+                do_generate(expression_node, out);
+                if (cur != NULL && cur->next != NULL) {
+                    fprintf(out, ", ");
+                }
+            }
         }
         fprintf(out, ");");
 
@@ -442,7 +523,7 @@ char *var_type_change(char *pascal_var_type) {
         c_var_type = "float";
     } else if (!strcmp(pascal_var_type, "double")) {
         c_var_type = "double";
-    } else if (!strcmp(pascal_var_type, "char")) {
+    } else if (!strcmp(pascal_var_type, "char") || !strcmp(pascal_var_type, "Char")) {
         c_var_type = "char";
     } else {
         c_var_type = pascal_var_type;
@@ -520,4 +601,14 @@ void generate_subprogram_defs(ASTNode *node, FILE *out) {
     } else {
         assert(0 && "unreachable");
     }
+}
+
+int is_basic_type(char *type) {
+    if(strcmp(type, "integer") == 0 || strcmp(type, "Integer") == 0 ||
+       strcmp(type, "real") == 0 || strcmp(type, "Real") == 0 ||
+       strcmp(type, "boolean") == 0 || strcmp(type, "Boolean") == 0 ||
+       strcmp(type, "char") == 0 || strcmp(type, "Char") == 0)
+        return 1;
+    else
+        return 0;
 }
